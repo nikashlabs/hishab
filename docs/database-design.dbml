@@ -1,0 +1,130 @@
+Table users {
+  id int [pk]
+  name varchar [null]
+  email varchar
+  password varchar
+  is_verified boolean
+  photo_url varchar [null]
+  created_at timestamp
+  modified_at timestamp
+  last_active timestamp
+}
+
+Table accounts {
+  id int [pk]
+  user_id int [ref: > users.id]
+  name varchar
+  balance float
+  currency_id int [ref: > currencies.id]
+}
+
+Table expense_records {
+  id int [pk]
+  user_id int [ref: > users.id]
+  account_id int [ref: > accounts.id]
+  title varchar
+  category_id int [ref: > expense_categories.id]
+  currency_id int [ref: > currencies.id]
+  amount float
+  attachment varchar [null]
+}
+
+Table income_records {
+  id int [pk]
+  user_id int [ref: > users.id]
+  account_id int [ref: > accounts.id]
+  title varchar
+  category_id int [ref: > income_categories.id]
+  currency_id int [ref: > currencies.id]
+  amount float
+  attachment varchar [null]
+}
+
+Table expense_categories {
+  id int [pk]
+  user_id int [ref: > users.id]
+  name varchar
+}
+
+Table income_categories {
+  id int [pk]
+  user_id int [ref: > users.id]
+  name varchar
+}
+
+Table currencies {
+  id int [pk]
+  name varchar
+  conversion_rate float
+}
+
+Table scheduled_records {
+  id int [pk]
+  user_id int [ref: > users.id]
+  account_id int [ref: > accounts.id]
+  title varchar
+  type enum("expense", "income", "investment")
+  category_id int [ref: > expense_categories.id]
+  currency_id int [ref: > currencies.id]
+  amount float
+  status enum("confirm", "pending", "cancel")
+  date timestamp
+  recurring_interval timestamp
+  recurring boolean
+}
+
+Table investments {
+  id int [pk]
+  user_id int [ref: > users.id]
+  account_id int [ref: > accounts.id]
+  title varchar
+  investment_type_id int [ref: > investment_types.id, null]
+  amount float
+  date timestamp
+  scheduled_record_id int [ref: > scheduled_records.id, null]
+}
+
+Table investment_types {
+  id int [pk]
+  user_id int [ref: > users.id]
+  name varchar
+}
+
+Table returns {
+  id int [pk]
+  user_id int [ref: > users.id]
+  account_id int [ref: > accounts.id]
+  investment_id int [ref: > investments.id]
+  title varchar
+  amount float
+  date timestamp
+  scheduled_record_id int [ref: > scheduled_records.id, null]
+}
+
+Table loans {
+  id int [pk]
+  user_id int [ref: > users.id]
+  account_id int [ref: > accounts.id]
+  title varchar
+  loan_type_id int [ref: > loan_types.id, null]
+  amount float
+  date timestamp
+}
+
+Table loan_types {
+  id int [pk]
+  user_id int [ref: > users.id]
+  name varchar
+}
+
+Table installments {
+  id int [pk]
+  user_id int [ref: > users.id]
+  account_id int [ref: > accounts.id]
+  loan_id int [ref: > loans.id]
+  title varchar
+  amount float
+  date timestamp
+  scheduled_record_id int [ref: > scheduled_records.id, null]
+}
+ 
