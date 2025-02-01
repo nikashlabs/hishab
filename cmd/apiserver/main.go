@@ -18,8 +18,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"os"
+
+	server "github.com/nikashlabs/hishab/internal/server"
 )
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
@@ -27,6 +31,22 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	databaseURL, exists := os.LookupEnv("DATABASE_URL")
+
+	if !exists {
+		fmt.Fprintf(os.Stderr, "DATABASE_URL not set\n")
+		os.Exit(1)
+	}
+
+	databaseConnection, err := server.ConnectDatabase(databaseURL)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error setting up database: %v\n", err)
+		os.Exit(1)
+	}
+	defer databaseConnection.Close(context.Background())
+
+	fmt.Println("Database connected successfully")
+
 	router := http.NewServeMux()
 	router.HandleFunc("GET /", rootHandler)
 

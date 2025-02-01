@@ -15,3 +15,19 @@
 // You should have received a copy of the GNU General Public License
 // along with hishab.  If not, see <https://www.gnu.org/licenses/>.
 
+package server
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/jackc/pgx/v5"
+)
+
+func ConnectDatabase(connectionString string) (*pgx.Conn, error) {
+	conn, err := pgx.Connect(context.Background(), connectionString)
+	if err != nil {
+		return nil, fmt.Errorf("unable to connect to database: %w", err)
+	}
+	return conn, nil
+}
