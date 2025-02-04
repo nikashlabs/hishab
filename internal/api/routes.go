@@ -15,3 +15,25 @@
 // You should have received a copy of the GNU General Public License
 // along with hishab.  If not, see <https://www.gnu.org/licenses/>.
 
+package api
+
+import (
+	"net/http"
+
+	"github.com/nikashlabs/hishab/internal/server/config"
+	"go.uber.org/zap"
+)
+
+func AddRoutes(
+	mux *http.ServeMux,
+	logger *zap.Logger,
+	config *config.Config,
+) {
+	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hi, Welcome Hishab Project\n"))
+	}))
+	// mux.Handle("/api/v1/comments", handleComments(logger, commentStore))
+	// mux.Handle("/api/v1/another", handleAnother(logger, anotherStore))
+	// mux.HandleFunc("/healthz", handleHealthz(logger))
+	// mux.Handle("/", http.NotFoundHandler())
+}

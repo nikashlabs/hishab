@@ -18,17 +18,74 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"net"
 	"net/http"
+	"os"
+	"os/signal"
+	"sync"
+	"time"
+
+	"github.com/nikashlabs/hishab/internal/server"
+	"github.com/nikashlabs/hishab/internal/server/config"
+	"github.com/nikashlabs/hishab/pkg/logger"
 )
 
-func rootHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Hello bro this is awesome")
+func run(
+	ctx context.Context,
+	args []string,
+	getenv func(string) string,
+) error {
+	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
+	defer cancel()
+
+	log, err := logger.NewLogger()
+	sugar := log.Sugar()
+
+	if err != nil {
+		return fmt.Errorf("error creating logger: %w", err)
+	}
+
+	config := &config.Config{
+		Host: getenv("HOST"),
+		Port: getenv("PORT"),
+	}
+
+	// Create the server
+	srv := server.NewServer(log, config)
+
+	httpServer := &http.Server{
+		Addr:    net.JoinHostPort(config.Host, config.Port),
+		Handler: srv,
+	}
+
+	go func() {
+		sugar.Infof("listening on %s\n", httpServer.Addr)
+		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			sugar.Fatalf("error listening and serving: %s\n", err)
+		}
+	}()
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		<-ctx.Done()
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := httpServer.Shutdown(shutdownCtx); err != nil {
+			sugar.Errorf("error shutting down http server: %s\n", err)
+		}
+	}()
+	wg.Wait()
+	return nil
 }
 
 func main() {
-	router := http.NewServeMux()
-	router.HandleFunc("GET /", rootHandler)
-
-	http.ListenAndServe(":5000", router)
+	ctx := context.Background()
+	if err := run(ctx, os.Args, os.Getenv); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
 }
