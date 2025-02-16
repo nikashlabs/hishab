@@ -18,37 +18,43 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"os"
 
-	server "github.com/nikashlabs/hishab/internal/server"
+	"github.com/joho/godotenv"
+	"github.com/nikashlabs/hishab/internal/database"
 )
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Hello bro this is awesome")
 }
 
-func main() {
-	databaseURL, exists := os.LookupEnv("DATABASE_URL")
-
-	if !exists {
-		fmt.Fprintf(os.Stderr, "DATABASE_URL not set\n")
-		os.Exit(1)
-	}
-
-	databaseConnection, err := server.ConnectDatabase(databaseURL)
+func loadConfig() {
+	// Load environment variables
+	err := godotenv.Load()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error setting up database: %v\n", err)
-		os.Exit(1)
+		fmt.Fprintf(os.Stderr, "Error loading .env\n")
 	}
-	defer databaseConnection.Close(context.Background())
+}
 
-	fmt.Println("Database connected successfully")
+func setupDatabase() {
+	// Initialize database
+	status, databaseConnectionPool := database.Init()
+	if status {
+		defer databaseConnectionPool.Close()
+	}
+}
 
+func setupServer() {
+	// Initialize server
 	router := http.NewServeMux()
-	router.HandleFunc("GET /", rootHandler)
-
+	router.HandleFunc("/", rootHandler)
 	http.ListenAndServe(":5000", router)
+}
+
+func main() {
+	loadConfig()
+	setupDatabase()
+	setupServer()
 }
