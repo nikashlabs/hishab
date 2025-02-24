@@ -28,7 +28,6 @@ import (
 	"time"
 
 	"github.com/nikashlabs/hishab/internal/server"
-	"github.com/nikashlabs/hishab/internal/server/config"
 	"github.com/nikashlabs/hishab/pkg/logger"
 )
 
@@ -40,14 +39,13 @@ func run(
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
-	log, err := logger.NewLogger()
-	sugar := log.Sugar()
+	log, err := logger.NewZapLogger()
 
 	if err != nil {
-		return fmt.Errorf("error creating logger: %w", err)
+		return err
 	}
 
-	config := &config.Config{
+	config := &server.Config{
 		Host: getenv("HOST"),
 		Port: getenv("PORT"),
 	}
@@ -61,9 +59,9 @@ func run(
 	}
 
 	go func() {
-		sugar.Infof("listening on %s\n", httpServer.Addr)
+		log.Info("Server started", "address", httpServer.Addr)
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			sugar.Fatalf("error listening and serving: %s\n", err)
+			log.Fatal("error listening and serving: %s\n", err)
 		}
 	}()
 
@@ -75,7 +73,7 @@ func run(
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		if err := httpServer.Shutdown(shutdownCtx); err != nil {
-			sugar.Errorf("error shutting down http server: %s\n", err)
+			log.Error("error shutting down http server:", err, "\n")
 		}
 	}()
 	wg.Wait()

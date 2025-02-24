@@ -20,11 +20,11 @@ package server
 import (
 	"net/http"
 
-	"go.uber.org/zap"
+	"github.com/nikashlabs/hishab/pkg/logger"
 )
 
 func NewServer(
-	logger *zap.Logger,
+	logger logger.Logger,
 	config *Config,
 ) http.Handler {
 	mux := http.NewServeMux()

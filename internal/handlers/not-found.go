@@ -14,25 +14,28 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with hishab.  If not, see <https://www.gnu.org/licenses/>.
-
-package server
+package handlers
 
 import (
 	"net/http"
 
-	"github.com/nikashlabs/hishab/internal/handlers"
-	"github.com/nikashlabs/hishab/internal/middlewares"
 	"github.com/nikashlabs/hishab/pkg/logger"
 )
 
-func addRoutes(
-	mux *http.ServeMux,
-	logger logger.Logger,
-	config *Config,
-) {
-	mux.Handle("/", middlewares.Log(logger, handlers.HandleNotFound(logger)))
-	// mux.Handle("/api/v1/comments", handleComments(logger, commentStore))
-	// mux.Handle("/api/v1/another", handleAnother(logger, anotherStore))
-	// mux.HandleFunc("/healthz", handleHealthz(logger))
-	// mux.Handle("/", http.NotFoundHandler())
+// Template for creating a new handler
+// func handleSomething(logger logger.Logger) http.Handler {
+// 	thing := prepareThing()
+// 	return http.HandlerFunc(
+// 		func(w http.ResponseWriter, r *http.Request) {
+// 			// use thing to handle request
+// 			logger.Info(r.Context(), "msg", "handleSomething")
+// 		}
+// 	)
+// }
+
+func HandleNotFound(logger logger.Logger) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Wrong Path Bro\n"))
+		logger.Info("Invalid Path", "invalid_path", r.URL.Path)
+	})
 }

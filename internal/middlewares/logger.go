@@ -17,6 +17,16 @@
 
 package middlewares
 
-func Logger() {
+import (
+	"net/http"
+
+	"github.com/nikashlabs/hishab/pkg/logger"
+)
+
+func Log(l logger.Logger, h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		l.Info("Request", "method", r.Method, "url", r.URL.Path)
+		h.ServeHTTP(w, r)
+	})
 
 }
