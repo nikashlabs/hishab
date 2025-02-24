@@ -15,3 +15,40 @@
 // You should have received a copy of the GNU General Public License
 // along with hishab.  If not, see <https://www.gnu.org/licenses/>.
 
+package logger
+
+import (
+	"log/slog"
+	"os"
+)
+
+type Slogger struct {
+	log *slog.Logger
+}
+
+func NewSlogLogger() Logger {
+	s := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+
+	return &Slogger{log: s}
+}
+
+func (s *Slogger) Debug(msg string, keysAndValues ...any) {
+	s.log.Debug(msg, keysAndValues...)
+}
+
+func (s *Slogger) Info(msg string, keysAndValues ...any) {
+	s.log.Info(msg, keysAndValues...)
+}
+
+func (s *Slogger) Warn(msg string, keysAndValues ...any) {
+	s.log.Warn(msg, keysAndValues...)
+}
+
+func (s *Slogger) Error(msg string, keysAndValues ...any) {
+	s.log.Error(msg, keysAndValues...)
+}
+
+func (s *Slogger) Fatal(msg string, keysAndValues ...any) {
+	s.log.Error(msg, keysAndValues...)
+	os.Exit(1)
+}
