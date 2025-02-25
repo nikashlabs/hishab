@@ -33,9 +33,9 @@ import (
 // 	)
 // }
 
-func HandleNotFound(logger logger.Logger) http.Handler {
+func HandleNotFound() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Wrong Path Bro\n"))
-		logger.Info("Invalid Path", "invalid_path", r.URL.Path)
+		logger.Log.Info("Invalid Path", "invalid_path", r.URL.Path)
 	})
 }
