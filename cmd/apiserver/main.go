@@ -43,6 +43,7 @@ func run(
 	defer cancel()
 
 	log, err := logger.NewZapLogger()
+	defer log.Sync() // flushes any buffered log entries
 
 	if err != nil {
 		return err

@@ -36,3 +36,7 @@ func (z *Zapper) Error(msg string, keysAndValues ...any) {
 func (z *Zapper) Fatal(msg string, keysAndValues ...any) {
 	z.log.Fatalw(msg, keysAndValues...)
 }
+
+func (z *Zapper) Sync() error {
+	return z.log.Sync()
+}
