@@ -13,6 +13,8 @@ This project is licensed under the GNU General Public License v3.0. See the [LIC
 1. Setup `.env` file
 
     ```shell
+    HOST={your_host}
+    PORT={your_port}
     POSTGRES_USER={your_user}
     POSTGRES_PASSWORD={your_password}
     POSTGRES_DB={your_database}
@@ -35,11 +37,35 @@ This project is licensed under the GNU General Public License v3.0. See the [LIC
 
 Make sure, [Go](https://go.dev/doc/install) is already installed.
 
-```ps
-go run .\cmd\apiserver\ 
-```
+1. **Windows**
+    
+    To start the server, run the following powershell commands
 
-Note that, the database migrations (up) will be run everytime you spin up the server.
+    ```ps
+    go build -o ./bin/hishab-api.exe ./cmd/apiserver
+    .\bin\hishab-api.exe
+    ```
+
+    To stop the server, run the following powershell command
+
+    ```ps
+    Get-Process hishab-api | Stop-Process -Force
+    ```
+
+2. **Linux/MacOS**
+
+    To start the server, run the following shell commands
+
+    ```shell
+    go build -o ./bin/hishab-api ./cmd/apiserver
+    ./bin/hishab-api
+    ```
+
+    To stop the server, run the following shell command
+
+    ```shell
+    pkill -f hishab-api
+    ```
 
 ## Development
 
