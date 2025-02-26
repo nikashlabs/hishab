@@ -1,8 +1,6 @@
 package logger
 
 import (
-	"sync"
-
 	"go.uber.org/zap"
 )
 
@@ -10,22 +8,13 @@ type Zapper struct {
 	log *zap.SugaredLogger
 }
 
-var _ Logger = (*Zapper)(nil)
-
-var (
-	instance Logger
-	once     sync.Once
-)
-
-func GetInstance() Logger {
-	once.Do(func() {
-		z, err := zap.NewProduction()
-		if err != nil {
-			panic(err)
-		}
-		instance = &Zapper{log: z.Sugar()}
-	})
-	return instance
+func NewZapLogger() (logger Logger, err error) {
+	z, err := zap.NewProduction()
+	if err != nil {
+		return nil, err
+	}
+	sugar := z.Sugar()
+	return &Zapper{log: sugar}, nil
 }
 
 func (z *Zapper) Debug(msg string, keysAndValues ...any) {
@@ -47,9 +36,3 @@ func (z *Zapper) Error(msg string, keysAndValues ...any) {
 func (z *Zapper) Fatal(msg string, keysAndValues ...any) {
 	z.log.Fatalw(msg, keysAndValues...)
 }
-
-func (z *Zapper) Sync() error {
-	return z.log.Sync()
-}
-
-var Log = GetInstance()

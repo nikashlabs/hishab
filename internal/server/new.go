@@ -19,14 +19,18 @@ package server
 
 import (
 	"net/http"
+
+	"github.com/nikashlabs/hishab/pkg/logger"
 )
 
 func NewServer(
+	logger logger.Logger,
 	config *Config,
 ) http.Handler {
 	mux := http.NewServeMux()
 	addRoutes(
 		mux,
+		logger,
 		config,
 	)
 

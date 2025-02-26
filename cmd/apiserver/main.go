@@ -34,20 +34,6 @@ import (
 	"github.com/nikashlabs/hishab/pkg/logger"
 )
 
-func loadEnv() {
-	err := godotenv.Load()
-	if err != nil {
-		logger.Log.Error("Could not load .env\n")
-	}
-}
-
-func setupDatabase() {
-	status, databaseConnectionPool := database.Init()
-	if status {
-		defer databaseConnectionPool.Close()
-	}
-}
-
 func run(
 	ctx context.Context,
 	args []string,
@@ -56,10 +42,11 @@ func run(
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
-	defer logger.Log.Sync() // flushes any buffered log entries
+	log, err := logger.NewZapLogger()
 
-	loadEnv()
-	setupDatabase()
+	if err != nil {
+		return err
+	}
 
 	config := &server.Config{
 		Host: getenv("HOST"),
@@ -67,7 +54,7 @@ func run(
 	}
 
 	// Create the server
-	srv := server.NewServer(config)
+	srv := server.NewServer(log, config)
 
 	httpServer := &http.Server{
 		Addr:    net.JoinHostPort(config.Host, config.Port),
@@ -75,9 +62,9 @@ func run(
 	}
 
 	go func() {
-		logger.Log.Info("Server started", "address", httpServer.Addr)
+		log.Info("Server started", "address", httpServer.Addr)
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Log.Fatal("error listening and serving: %s\n", err)
+			log.Fatal("error listening and serving: %s\n", err)
 		}
 	}()
 
@@ -89,14 +76,33 @@ func run(
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		if err := httpServer.Shutdown(shutdownCtx); err != nil {
-			logger.Log.Error("error shutting down http server:", err, "\n")
+			log.Error("error shutting down http server:", err, "\n")
 		}
 	}()
 	wg.Wait()
 	return nil
 }
 
+func loadConfig() {
+	// Load environment variables
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading .env\n")
+	}
+}
+
+func setupDatabase() {
+	// Initialize database
+	status, databaseConnectionPool := database.Init()
+	if status {
+		defer databaseConnectionPool.Close()
+	}
+}
+
 func main() {
+	loadConfig()
+	setupDatabase()
+
 	ctx := context.Background()
 	if err := run(ctx, os.Args, os.Getenv); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)

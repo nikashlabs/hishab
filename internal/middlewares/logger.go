@@ -23,9 +23,10 @@ import (
 	"github.com/nikashlabs/hishab/pkg/logger"
 )
 
-func Log(h http.Handler) http.Handler {
+func Log(l logger.Logger, h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		logger.Log.Info("Request", "method", r.Method, "url", r.URL.Path)
+		l.Info("Request", "method", r.Method, "url", r.URL.Path)
 		h.ServeHTTP(w, r)
 	})
+
 }

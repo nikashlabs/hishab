@@ -22,13 +22,15 @@ import (
 
 	"github.com/nikashlabs/hishab/internal/handlers"
 	"github.com/nikashlabs/hishab/internal/middlewares"
+	"github.com/nikashlabs/hishab/pkg/logger"
 )
 
 func addRoutes(
 	mux *http.ServeMux,
+	logger logger.Logger,
 	config *Config,
 ) {
-	mux.Handle("/", middlewares.Log(handlers.HandleNotFound()))
+	mux.Handle("/", middlewares.Log(logger, handlers.HandleNotFound(logger)))
 	// mux.Handle("/api/v1/comments", handleComments(logger, commentStore))
 	// mux.Handle("/api/v1/another", handleAnother(logger, anotherStore))
 	// mux.HandleFunc("/healthz", handleHealthz(logger))

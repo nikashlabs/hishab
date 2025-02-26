@@ -25,7 +25,6 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
-	"github.com/nikashlabs/hishab/pkg/logger"
 )
 
 func RunMigrations(databaseConnectionPool *pgxpool.Pool) error {
@@ -53,6 +52,6 @@ func RunMigrations(databaseConnectionPool *pgxpool.Pool) error {
 		return fmt.Errorf("unable to apply migrations: %w", err)
 	}
 
-	logger.Log.Info("Migrations applied successfully!")
+	fmt.Println("Migrations applied successfully!")
 	return nil
 }

@@ -22,25 +22,25 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/nikashlabs/hishab/pkg/logger"
 )
 
 func Init() (bool, *pgxpool.Pool) {
 	// Connection
 	connectionPool, err := pgxpool.New(context.Background(), loadDatabaseURL())
 	if err != nil {
-		logger.Log.Error("Database connection failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Database connection failed: %v\n", err)
 		return false, nil
 	}
-	logger.Log.Info("Database connection established")
+	fmt.Println("Database connection established")
 
 	// Migrations
 	err = RunMigrations(connectionPool)
 	if err != nil {
-		logger.Log.Error("Unable to run migrations: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Unable to run migrations: %v\n", err)
 	} else {
-		logger.Log.Info("Migrations ran successfully")
+		fmt.Println("Migrations ran successfully")
 	}
 	return true, connectionPool
 }
@@ -52,7 +52,7 @@ func loadDatabaseURL() string {
 	for _, key := range requiredVariables {
 		value, exists := os.LookupEnv(key)
 		if !exists || value == "" {
-			logger.Log.Error("Missing required environment variable: %s", key)
+			fmt.Fprintf(os.Stderr, "Missing required environment variable: %s", key)
 			return ""
 		}
 		variables[key] = value
@@ -68,14 +68,14 @@ func loadDatabaseURL() string {
 		variables["POSTGRES_SSLMODE"],
 	)
 
-	logger.Log.Info("Database URL", "url", databaseURL)
+	fmt.Println("Database URL:", databaseURL)
 	return databaseURL
 }
 
-// func Connect(connectionString string) (*pgx.Conn, error) {
-// 	conn, err := pgx.Connect(context.Background(), connectionString)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("Unable to connect to database: %w", err)
-// 	}
-// 	return conn, nil
-// }
+func Connect(connectionString string) (*pgx.Conn, error) {
+	conn, err := pgx.Connect(context.Background(), connectionString)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to connect to database: %w", err)
+	}
+	return conn, nil
+}
