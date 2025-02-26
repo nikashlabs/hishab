@@ -34,13 +34,6 @@ import (
 	"github.com/nikashlabs/hishab/pkg/logger"
 )
 
-func loadEnv(log logger.Logger) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Error("Could not load .env file")
-	}
-}
-
 func setupDatabase(log logger.Logger) (*pgxpool.Pool, error) {
 	status, databaseConnectionPool := database.Init(log)
 	if !status {
@@ -49,36 +42,46 @@ func setupDatabase(log logger.Logger) (*pgxpool.Pool, error) {
 	return databaseConnectionPool, nil
 }
 
-func loadServerConfig(log logger.Logger) *server.Config {
+func loadServerConfig(log logger.Logger) (*server.Config, error) {
 	// change here: while adding new config variables
 	requiredVariables := []string{"HOST", "PORT"}
-
 	variables := make(map[string]string)
+	missingRequiredVariables := []string{}
 	for _, key := range requiredVariables {
 		value, exists := os.LookupEnv(key)
 		if !exists || value == "" {
-			log.Error("Missing required environment variable: %s", key)
+			log.Error("missing required environment variable: %s", key)
+			missingRequiredVariables = append(missingRequiredVariables, key)
 		}
 		variables[key] = value
 	}
+
+	if len(missingRequiredVariables) > 0 {
+		return nil, fmt.Errorf("missing required environment variables: %v", missingRequiredVariables)
+	}
+
 	// change here: while adding new config variables
 	return &server.Config{
 		Host: variables["HOST"],
 		Port: variables["PORT"],
-	}
+	}, nil
 }
 
 func setupServer(log logger.Logger, ctx context.Context) error {
-	config := loadServerConfig(log)
+	// load config
+	config, err := loadServerConfig(log)
+	if err != nil {
+		return fmt.Errorf("failed to load server configuration: %w", err)
+	}
 
-	// Create
+	// create
 	srv := server.NewServer(log, config)
 	httpServer := &http.Server{
 		Addr:    net.JoinHostPort(config.Host, config.Port),
 		Handler: srv,
 	}
 
-	// Start
+	// start
 	go func() {
 		log.Info("server started", "address", httpServer.Addr)
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -96,7 +99,7 @@ func handleGracefulShutdown(log logger.Logger, httpServer *http.Server, ctx cont
 	defer cancel()
 
 	if err := httpServer.Shutdown(shutdownCtx); err != nil {
-		log.Error("could not shutdown server", "error", err)
+		log.Error("failed to shutdown server", "error", err)
 		return err
 	}
 
@@ -108,17 +111,25 @@ func run(ctx context.Context, args []string) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
+	// logger initialization
 	// change here: if you want to use a different logger
 	log, err := logger.NewZapLogger()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to initialize logger: %w", err)
 	}
 
 	if flushable, ok := log.(logger.Flushable); ok {
-		defer flushable.Sync() // ensure flush, for flushable loggers
+		defer func() {
+			if err := flushable.Sync(); err != nil {
+				fmt.Fprintf(os.Stderr, "failed to flush logs: %v\n", err)
+			}
+		}() // ensure flush, for flushable loggers
 	}
 
-	loadEnv(log)
+	// load .env
+	if err := godotenv.Load(); err != nil {
+		return fmt.Errorf("failed to load .env: %w", err)
+	}
 
 	// database initialization
 	databaseConnectionPool, err := setupDatabase(log)

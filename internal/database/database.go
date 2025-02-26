@@ -30,17 +30,17 @@ func Init(log logger.Logger) (bool, *pgxpool.Pool) {
 	// Connection
 	connectionPool, err := pgxpool.New(context.Background(), loadDatabaseURL(log))
 	if err != nil {
-		log.Error("Database connection failed: %v\n", err)
+		log.Error("database connection failed: %v\n", err)
 		return false, nil
 	}
-	log.Info("Database connection established")
+	log.Info("database connection successful")
 
 	// Migrations
 	err = RunMigrations(connectionPool)
 	if err != nil {
-		log.Error("Unable to run migrations: %v\n", err)
+		log.Error("failed to run migrations: %v\n", err)
 	} else {
-		log.Info("Migrations ran successfully")
+		log.Info("migrations ran successfully")
 	}
 	return true, connectionPool
 }
@@ -77,6 +77,6 @@ func loadDatabaseURL(log logger.Logger) string {
 		variables["POSTGRES_SSLMODE"],
 	)
 
-	log.Info("Database URL loaded", "url", databaseURL)
+	log.Info("database URL loaded", "url", databaseURL)
 	return databaseURL
 }
