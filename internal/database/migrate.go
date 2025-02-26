@@ -52,6 +52,5 @@ func RunMigrations(databaseConnectionPool *pgxpool.Pool) error {
 		return fmt.Errorf("unable to apply migrations: %w", err)
 	}
 
-	fmt.Println("Migrations applied successfully!")
 	return nil
 }
