@@ -26,6 +26,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 
 	"github.com/nikashlabs/hishab/internal/database"
@@ -40,11 +41,12 @@ func loadEnv(log logger.Logger) {
 	}
 }
 
-func setupDatabase(log logger.Logger) {
+func setupDatabase(log logger.Logger) (*pgxpool.Pool, error) {
 	status, databaseConnectionPool := database.Init(log)
-	if status {
-		defer databaseConnectionPool.Close()
+	if !status {
+		return nil, fmt.Errorf("database initialization failed")
 	}
+	return databaseConnectionPool, nil
 }
 
 func loadServerConfig(log logger.Logger) *server.Config {
@@ -78,7 +80,7 @@ func setupServer(log logger.Logger, ctx context.Context) error {
 
 	// Start
 	go func() {
-		log.Info("Server started", "address", httpServer.Addr)
+		log.Info("server started", "address", httpServer.Addr)
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal("error listening and serving: %s\n", err)
 		}
@@ -94,11 +96,11 @@ func handleGracefulShutdown(log logger.Logger, httpServer *http.Server, ctx cont
 	defer cancel()
 
 	if err := httpServer.Shutdown(shutdownCtx); err != nil {
-		log.Error("Could not shutdown HTTP server", "error", err)
+		log.Error("could not shutdown server", "error", err)
 		return err
 	}
 
-	log.Info("HTTP server shutdown gracefully")
+	log.Info("server shutdown gracefully")
 	return nil
 }
 
@@ -117,7 +119,14 @@ func run(ctx context.Context, args []string) error {
 	}
 
 	loadEnv(log)
-	setupDatabase(log)
+
+	// database initialization
+	databaseConnectionPool, err := setupDatabase(log)
+	if err != nil {
+		return err
+	}
+	defer databaseConnectionPool.Close()
+
 	return setupServer(log, ctx)
 }
 
