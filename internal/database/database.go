@@ -77,6 +77,6 @@ func loadDatabaseURL(log logger.Logger) string {
 		variables["POSTGRES_SSLMODE"],
 	)
 
-	log.Info("Database URL: %s", databaseURL)
+	log.Info("Database URL loaded", "url", databaseURL)
 	return databaseURL
 }

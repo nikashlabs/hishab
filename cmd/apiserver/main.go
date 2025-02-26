@@ -106,11 +106,14 @@ func run(ctx context.Context, args []string) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
+	// change here: if you want to use a different logger
 	log, err := logger.NewZapLogger()
-	defer log.Sync() // flushes any buffered log entries
-
 	if err != nil {
 		return err
+	}
+
+	if flushable, ok := log.(logger.Flushable); ok {
+		defer flushable.Sync() // ensure flush, for flushable loggers
 	}
 
 	loadEnv(log)
