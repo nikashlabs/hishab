@@ -39,9 +39,9 @@ func Init(log logger.Logger) (bool, *pgxpool.Pool) {
 	err = RunMigrations(connectionPool)
 	if err != nil {
 		log.Error("failed to run migrations: %v\n", err)
-	} else {
-		log.Info("migrations ran successfully")
+		return false, nil
 	}
+	log.Info("migrations ran successfully")
 	return true, connectionPool
 }
 
