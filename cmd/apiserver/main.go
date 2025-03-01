@@ -28,7 +28,9 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 
+	"github.com/nikashlabs/hishab/internal/cache"
 	"github.com/nikashlabs/hishab/internal/database"
 	"github.com/nikashlabs/hishab/internal/server"
 	"github.com/nikashlabs/hishab/pkg/logger"
@@ -107,6 +109,24 @@ func handleGracefulShutdown(log logger.Logger, httpServer *http.Server, ctx cont
 	return nil
 }
 
+// change here: remove it when redis implementation is done
+func testRedis(ctx context.Context, log logger.Logger, rdb *redis.Client) {
+	key := "greatness"
+	value := "nothingness"
+
+	if err := rdb.Set(ctx, key, value, 0).Err(); err != nil {
+		log.Error("failed to set key in redis: %v", err)
+		return
+	}
+	log.Info("Set value in cache", key, value)
+
+	val, err := rdb.Get(ctx, key).Result()
+	if err != nil {
+		log.Error("failed to get key from redis: %v", err)
+	}
+	log.Info("Got value from cache", key, val)
+}
+
 func run(ctx context.Context, args []string) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
@@ -137,6 +157,16 @@ func run(ctx context.Context, args []string) error {
 		return err
 	}
 	defer databaseConnectionPool.Close()
+
+	// redis initialization
+	success, rdb := cache.Init(log)
+	if !success {
+		log.Fatal("failed to initialize Redis")
+	}
+	defer rdb.Close()
+
+	// change here: remove it when redis implementation is done
+	testRedis(ctx, log, rdb)
 
 	return setupServer(log, ctx)
 }
