@@ -14,23 +14,23 @@ This project is licensed under the GNU General Public License v3.0. See the [LIC
 
     ```shell
     # Server
-    HOST={your_host}
+    HOST={your_host}    
     PORT={your_port}
     # Database
-    POSTGRES_USER={your_user}
+    POSTGRES_USER={your_user}   
     POSTGRES_PASSWORD={your_password}
     POSTGRES_DB={your_database}
-    POSTGRES_HOST={your_host}
+    POSTGRES_HOST={your_host}       # localhost
     POSTGRES_PORT={your_port}
     POSTGRES_SSLMODE={your_value}
     # Cache
-    REDIS_HOST={your_host}
+    REDIS_HOST={your_host}          # localhost
     REDIS_PORT={your_port}
     REDIS_PASSWORD={your_password}
-    REDIS_DB={your_value}
-    REDIS_PROTOCOL={your_value}
+    REDIS_DB=0                      # Redis logical database number (typically 0-15)
+    REDIS_PROTOCOL=3                # Redis protocol version (2 or 3)
     # Others
-    PRODUCTION={your_value}
+    PRODUCTION={true/false}
     ```
 
 2. Make sure you got [docker](https://www.docker.com/) installed.
