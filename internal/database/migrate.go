@@ -31,12 +31,14 @@ func RunMigrations(databaseConnectionPool *pgxpool.Pool) error {
 	// Convert *pgxpool.Pool to *sql.DB
 	// https://github.com/jackc/pgx/blob/master/stdlib/sql.go
 	db := stdlib.OpenDBFromPool(databaseConnectionPool)
+	defer db.Close()
 
 	// Create migration driver
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		return fmt.Errorf("unable to create migration driver: %w", err)
 	}
+	defer driver.Close()
 
 	// Create migration instance
 	migration_instance, err := migrate.NewWithDatabaseInstance(
