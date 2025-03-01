@@ -1,0 +1,801 @@
+openapi: 3.0.3
+info:
+  title: Hishab API
+  description: API specification for the Hishab Project
+  version: 1.0.0
+servers:
+  - url: TBD
+paths:
+  /user/get-profile:
+    get:
+      summary: Get user profile
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  email:
+                    type: string
+                  is_verified:
+                    type: boolean
+                  photo_url:
+                    type: string
+                  last_active:
+                    type: string
+                    format: date-time
+  /user/change-password:
+    put:
+      summary: Change user password
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                new_password:
+                  type: string
+      responses:
+        '200':
+          description: Password changed successfully
+  /user/edit-profile:
+    put:
+      summary: Edit user profile
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                photo_url:
+                  type: string
+      responses:
+        '200':
+          description: Updated user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /accounts:
+    get:
+      summary: Get all accounts
+      tags:
+        - Account
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+  /account/{id}:
+    get:
+      summary: Get account by ID
+      tags:
+        - Account
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Account details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+    delete:
+      summary: Delete account by ID
+      tags:
+        - Account
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Account deleted successfully
+  /account:
+    post:
+      summary: Create a new account
+      tags:
+        - Account
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                currency_id:
+                  type: integer
+      responses:
+        '200':
+          description: Account created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+  /account/{id}/change-name:
+    put:
+      summary: Change account name
+      tags:
+        - Account
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        '200':
+          description: Name changed successfully
+  /account/{id}/change-currency:
+    put:
+      summary: Change account currency
+      tags:
+        - Account
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                new_currency_id:
+                  type: integer
+                conversion_rate:
+                  type: number
+                  format: float
+      responses:
+        '200':
+          description: Currency changed successfully
+  /expenses:
+    get:
+      summary: Get all expenses
+      tags:
+        - Expense
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: account_id
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of expense records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExpenseRecord'
+    post:
+      summary: Create a new expense
+      tags:
+        - Expense
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                account_id:
+                  type: integer
+                title:
+                  type: string
+                category_id:
+                  type: integer
+                amount:
+                  type: number
+                  format: float
+                attachment:
+                  type: string
+                  nullable: true
+      responses:
+        '200':
+          description: Expense record created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseRecord'
+  /expenses/{id}:
+    put:
+      summary: Update an expense record
+      tags:
+        - Expense
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                account_id:
+                  type: integer
+                  nullable: true
+                title:
+                  type: string
+                  nullable: true
+                category_id:
+                  type: integer
+                  nullable: true
+                amount:
+                  type: number
+                  format: float
+                  nullable: true
+                attachment:
+                  type: string
+                  nullable: true
+      responses:
+        '200':
+          description: Expense record updated successfully
+    delete:
+      summary: Delete an expense record
+      tags:
+        - Expense
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Expense record deleted successfully
+  /incomes:
+    get:
+      summary: Get all income records
+      tags:
+        - Income
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: account_id
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of income records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IncomeRecord'
+    post:
+      summary: Create a new income record
+      tags:
+        - Income
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                category_id:
+                  type: integer
+                currency_id:
+                  type: integer
+                amount:
+                  type: number
+                  format: float
+                attachment:
+                  type: string
+                  nullable: true
+      responses:
+        '200':
+          description: Income record created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncomeRecord'
+  /incomes/{id}:
+    put:
+      summary: Update an income record
+      tags:
+        - Income
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                account_id:
+                  type: integer
+                  nullable: true
+                title:
+                  type: string
+                  nullable: true
+                category_id:
+                  type: integer
+                  nullable: true
+                amount:
+                  type: number
+                  format: float
+                  nullable: true
+                attachment:
+                  type: string
+                  nullable: true
+      responses:
+        '200':
+          description: Income record updated successfully
+    delete:
+      summary: Delete an income record
+      tags:
+        - Income
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Income record deleted successfully
+  /investments:
+    get:
+      summary: Get all investment records
+      tags:
+        - Investment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: account_id
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of investments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Investment'
+    post:
+      summary: Create a new investment record
+      tags:
+        - Investment
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Investment'
+      responses:
+        '200':
+          description: Investment created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+  /investments/{id}:
+    put:
+      summary: Update an investment record
+      tags:
+        - Investment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Investment'
+      responses:
+        '200':
+          description: Investment updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+    delete:
+      summary: Delete an investment record
+      tags:
+        - Investment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Investment deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+  /loans:
+    get:
+      summary: Get all loans
+      tags:
+        - Loan
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: account_id
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of loans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Loan'
+    post:
+      summary: Create a new loan
+      tags:
+        - Loan
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Loan'
+      responses:
+        '200':
+          description: Loan created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+  /loans/{loan_id}/installments:
+    post:
+      summary: Add a new installment to a loan
+      tags:
+        - Loan
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: loan_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Installment'
+      responses:
+        '200':
+          description: Installment added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+    put:
+      summary: Update multiple installments for a loan
+      tags:
+        - Loan
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: loan_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Installment'
+      responses:
+        '200':
+          description: Installments updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+  /installments/{id}:
+    delete:
+      summary: Delete an installment
+      tags:
+        - Loan
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Installment deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        is_verified:
+          type: boolean
+        photo_url:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        modified_at:
+          type: string
+          format: date-time
+        last_active:
+          type: string
+          format: date-time
+    Account:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        name:
+          type: string
+        balance:
+          type: number
+          format: float
+        currency_id:
+          type: integer
+    ExpenseRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        account_id:
+          type: integer
+        title:
+          type: string
+        category_id:
+          type: integer
+        currency_id:
+          type: integer
+        amount:
+          type: number
+          format: float
+        attachment:
+          type: string
+          nullable: true
+    IncomeRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        account_id:
+          type: integer
+        title:
+          type: string
+        category_id:
+          type: integer
+        currency_id:
+          type: integer
+        amount:
+          type: number
+          format: float
+        attachment:
+          type: string
+          nullable: true
+    Investment:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        account_id:
+          type: integer
+        title:
+          type: string
+        investment_type_id:
+          type: integer
+          nullable: true
+        amount:
+          type: number
+          format: float
+        date:
+          type: string
+          format: date-time
+        scheduled_record_id:
+          type: integer
+          nullable: true
+    Loan:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        account_id:
+          type: integer
+        title:
+          type: string
+        loan_type_id:
+          type: integer
+          nullable: true
+        amount:
+          type: number
+          format: float
+        date:
+          type: string
+          format: date-time
+    Installment:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        account_id:
+          type: integer
+        loan_id:
+          type: integer
+        title:
+          type: string
+        amount:
+          type: number
+          format: float
+        date:
+          type: string
+          format: date-time
+        scheduled_record_id:
+          type: integer
+          nullable: true
+

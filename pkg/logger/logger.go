@@ -25,3 +25,7 @@ type Logger interface {
 	Error(msg string, keysAndValues ...any)
 	Fatal(msg string, keysAndValues ...any)
 }
+
+type Flushable interface {
+	Sync() error
+}

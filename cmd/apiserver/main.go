@@ -24,65 +24,126 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"sync"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/joho/godotenv"
+
+	"github.com/nikashlabs/hishab/internal/database"
 	"github.com/nikashlabs/hishab/internal/server"
 	"github.com/nikashlabs/hishab/pkg/logger"
 )
 
-func run(
-	ctx context.Context,
-	args []string,
-	getenv func(string) string,
-) error {
-	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
-	defer cancel()
+func setupDatabase(log logger.Logger) (*pgxpool.Pool, error) {
+	status, databaseConnectionPool := database.Init(log)
+	if !status {
+		return nil, fmt.Errorf("database initialization failed")
+	}
+	return databaseConnectionPool, nil
+}
 
-	log, err := logger.NewZapLogger()
+func loadServerConfig(log logger.Logger) (*server.Config, error) {
+	// change here: while adding new config variables
+	requiredVariables := []string{"HOST", "PORT"}
+	variables := make(map[string]string)
+	missingRequiredVariables := []string{}
+	for _, key := range requiredVariables {
+		value, exists := os.LookupEnv(key)
+		if !exists || value == "" {
+			log.Error("missing required environment variable: %s", key)
+			missingRequiredVariables = append(missingRequiredVariables, key)
+		}
+		variables[key] = value
+	}
 
+	if len(missingRequiredVariables) > 0 {
+		return nil, fmt.Errorf("missing required environment variables: %v", missingRequiredVariables)
+	}
+
+	// change here: while adding new config variables
+	return &server.Config{
+		Host: variables["HOST"],
+		Port: variables["PORT"],
+	}, nil
+}
+
+func setupServer(log logger.Logger, ctx context.Context) error {
+	// load config
+	config, err := loadServerConfig(log)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to load server configuration: %w", err)
 	}
 
-	config := &server.Config{
-		Host: getenv("HOST"),
-		Port: getenv("PORT"),
-	}
-
-	// Create the server
+	// create
 	srv := server.NewServer(log, config)
-
 	httpServer := &http.Server{
 		Addr:    net.JoinHostPort(config.Host, config.Port),
 		Handler: srv,
 	}
 
+	// start
 	go func() {
-		log.Info("Server started", "address", httpServer.Addr)
+		log.Info("server started", "address", httpServer.Addr)
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal("error listening and serving: %s\n", err)
 		}
 	}()
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		<-ctx.Done()
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-		if err := httpServer.Shutdown(shutdownCtx); err != nil {
-			log.Error("error shutting down http server:", err, "\n")
-		}
-	}()
-	wg.Wait()
+	return handleGracefulShutdown(log, httpServer, ctx)
+}
+
+func handleGracefulShutdown(log logger.Logger, httpServer *http.Server, ctx context.Context) error {
+	<-ctx.Done()
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := httpServer.Shutdown(shutdownCtx); err != nil {
+		log.Error("failed to shutdown server", "error", err)
+		return err
+	}
+
+	log.Info("server shutdown gracefully")
 	return nil
+}
+
+func run(ctx context.Context, args []string) error {
+	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
+	defer cancel()
+
+	// logger initialization
+	// change here: if you want to use a different logger
+	log, err := logger.NewZapLogger()
+	if err != nil {
+		return fmt.Errorf("failed to initialize logger: %w", err)
+	}
+
+	if flushable, ok := log.(logger.Flushable); ok {
+		defer func() {
+			if err := flushable.Sync(); err != nil {
+				fmt.Fprintf(os.Stderr, "failed to flush logs: %v\n", err)
+			}
+		}() // ensure flush, for flushable loggers
+	}
+
+	// load .env
+	if err := godotenv.Load(); err != nil {
+		return fmt.Errorf("failed to load .env: %w", err)
+	}
+
+	// database initialization
+	databaseConnectionPool, err := setupDatabase(log)
+	if err != nil {
+		return err
+	}
+	defer databaseConnectionPool.Close()
+
+	return setupServer(log, ctx)
 }
 
 func main() {
 	ctx := context.Background()
-	if err := run(ctx, os.Args, os.Getenv); err != nil {
+	if err := run(ctx, os.Args); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
 		os.Exit(1)
 	}
