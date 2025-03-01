@@ -44,7 +44,7 @@ func Init(log logger.Logger) (bool, *redis.Client) {
 
 	pong, err := rdb.Ping(ctx).Result()
 	if err != nil {
-		log.Error("failed to connect to redis: %v", err)
+		log.Error("failed to connect to redis", "reason", err)
 		return false, nil
 	}
 	log.Info("redis connection successful", "response", pong)
@@ -58,7 +58,7 @@ func loadRedisOptions(log logger.Logger) (*redis.Options, error) {
 	for _, key := range requiredVariables {
 		value, exists := os.LookupEnv(key)
 		if !exists || value == "" {
-			log.Error("missing required environment variable: %s", key)
+			log.Error("missing required environment variable", "variable", key)
 			return nil, fmt.Errorf("missing required environment variable: %s", key)
 		}
 		variables[key] = value
