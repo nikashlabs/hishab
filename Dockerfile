@@ -24,7 +24,6 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /app/apiserver ./cmd/apiserver
 FROM alpine:latest
 WORKDIR /app
 COPY --from=builder /app/apiserver /app/apiserver
-COPY --from=builder /app/.env /app/.env
 COPY --from=builder /app/internal/database/migrations /app/internal/database/migrations
 EXPOSE ${PORT}
 CMD ["./apiserver"]
