@@ -8,13 +8,13 @@ This project is licensed under the GNU General Public License v3.0. See the [LIC
 
 ## Getting Started
 
-### Setup Database (PostgreSQL)
+### Run Server
 
 1. Setup `.env` file
 
     ```shell
     # Server
-    HOST={your_host}    
+    HOST=0.0.0.0                    # for the docker container to listen on all interfaces 
     PORT={your_port}
     # Database
     POSTGRES_USER={your_user}   
@@ -35,7 +35,10 @@ This project is licensed under the GNU General Public License v3.0. See the [LIC
 
 2. Make sure you got [docker](https://www.docker.com/) installed.
 
-3. There's a `docker-compose.yml` file in the root directory, specifying the containers configurations. 
+3. There's a `docker-compose.yml` file in the root directory, specifying the containers' configurations. 
+    - postgres
+    - redis
+    - apiserver
 
 4. Run the docker containers
 
@@ -43,7 +46,9 @@ This project is licensed under the GNU General Public License v3.0. See the [LIC
     docker-compose up -d
     ```
 
-### Run Server
+## Development
+
+### Run the Server Locally (Development)
 
 Make sure, [Go](https://go.dev/doc/install) is already installed.
 
@@ -76,8 +81,6 @@ Make sure, [Go](https://go.dev/doc/install) is already installed.
     ```shell
     pkill -f hishab-api
     ```
-
-## Development
 
 ### sqlc
 
