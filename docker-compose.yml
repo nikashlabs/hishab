@@ -11,6 +11,11 @@ services:
       - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
   redis:
     image: redis:7.4.2-alpine
     container_name: hishab_redis
@@ -45,8 +50,10 @@ services:
       REDIS_PROTOCOL: ${REDIS_PROTOCOL}
       PRODUCTION: ${PRODUCTION}
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
 volumes:
   postgres_data:
