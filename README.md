@@ -1,6 +1,6 @@
 # Hishab
 
-Hishab (A Bengali word) means keeping track of your assets/income/expense
+Hishab (হিসাব), in Bengali, means to keep track of one's income/expense/asset.
 
 ## License
 
@@ -33,54 +33,42 @@ This project is licensed under the GNU General Public License v3.0. See the [LIC
     PRODUCTION={true/false}
     ```
 
-2. Make sure you got [docker](https://www.docker.com/) installed.
+2. Install [docker](https://www.docker.com/) on the system
 
-3. There's a `docker-compose.yml` file in the root directory, specifying the containers' configurations. 
+3. The root directory contains `docker-compose.yml` which specifies the containers' configurations. 
     - postgres
     - redis
     - apiserver
 
 4. Run the docker containers
 
+    First Time
+
+    ```shell
+    docker-compose up --build
     ```
-    docker-compose up -d
+
+    Later
+    
+    ```shell
+    docker-compose up
     ```
+
+### Reset Server
+
+Powershell Command
+
+```shell
+docker-compose down -v --remove-orphans; docker-compose up --build
+```
+
+Shell Command
+
+```shell
+docker-compose down -v --remove-orphans && docker-compose up --build
+```
 
 ## Development
-
-### Run the Server Locally (Development)
-
-Make sure, [Go](https://go.dev/doc/install) is already installed.
-
-1. **Windows**
-    
-    To start the server, run the following powershell commands
-
-    ```ps
-    go build -o ./bin/hishab-api.exe ./cmd/apiserver
-    .\bin\hishab-api.exe
-    ```
-
-    To stop the server, invoke keyboard interrupt (Press `CTRL+C`) or run the following powershell command
-
-    ```ps
-    Get-Process hishab-api | Stop-Process -Force
-    ```
-
-2. **Linux/MacOS**
-
-    To start the server, run the following shell commands
-
-    ```shell
-    go build -o ./bin/hishab-api ./cmd/apiserver
-    ./bin/hishab-api
-    ```
-
-    To stop the server, invoke keyboard interrupt (Press `CTRL+C`) or run the following shell command
-
-    ```shell
-    pkill -f hishab-api
-    ```
 
 ### sqlc
 
@@ -103,13 +91,7 @@ Make sure, [Go](https://go.dev/doc/install) is already installed.
 
 ### Powershell Commands
 
-1. Reset Docker Containers (Database, Cache)
-
-    ```ps
-    docker-compose down | docker volume rm hishab_postgres_data hishab_redis_data | docker-compose up -d
-    ```
-
-2. Run Migrations
+1. Run Migrations
 
     ```ps
     migrate -path "internal/database/migrations/" -database "postgres://{your_user}:{your_password}@{your_host}:{your_port}/{your_database}?sslmode=disable" up
