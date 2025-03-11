@@ -14,28 +14,21 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with hishab.  If not, see <https://www.gnu.org/licenses/>.
-package handlers
 
-import (
-	"net/http"
+package repository
 
-	"github.com/nikashlabs/hishab/pkg/logger"
-)
-
-// Template for creating a new handler
-// func handleSomething(logger logger.Logger) http.Handler {
-// 	thing := prepareThing()
-// 	return http.HandlerFunc(
-// 		func(w http.ResponseWriter, r *http.Request) {
-// 			// use thing to handle request
-// 			logger.Info(r.Context(), "msg", "handleSomething")
-// 		}
-// 	)
-// }
-
-func HandleNotFound(logger logger.Logger) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Wrong Path Bro\n"))
-		logger.Info("Invalid Path", "invalid_path", r.URL.Path)
-	})
+type Repositories struct {
+	User            *UserRepository
+	Account         *AccountRepository
+	Currency        *CurrencyRepository
+	ExpenseCategory *ExpenseCategoryRepository
+	ExpenseRecord   *ExpenseRecordRepository
+	IncomeCategory  *IncomeCategoryRepository
+	IncomeRecord    *IncomeRecordRepository
+	Installment     *InstallmentRepository
+	InvestmentType  *InvestmentTypeRepository
+	Investment      *InvestmentRepository
+	LoanType        *LoanTypeRepository
+	Loan            *LoanRepository
+	ScheduledRecord *ScheduledRecordRepository
 }

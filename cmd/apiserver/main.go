@@ -30,6 +30,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/nikashlabs/hishab/internal/database"
+	"github.com/nikashlabs/hishab/internal/repository"
 	"github.com/nikashlabs/hishab/internal/server"
 	"github.com/nikashlabs/hishab/pkg/logger"
 )
@@ -67,7 +68,7 @@ func loadServerConfig(log logger.Logger) (*server.Config, error) {
 	}, nil
 }
 
-func setupServer(log logger.Logger, ctx context.Context) error {
+func setupServer(log logger.Logger, ctx context.Context, repositories *repository.Repositories) error {
 	// load config
 	config, err := loadServerConfig(log)
 	if err != nil {
@@ -75,7 +76,7 @@ func setupServer(log logger.Logger, ctx context.Context) error {
 	}
 
 	// create
-	srv := server.NewServer(log, config)
+	srv := server.NewServer(log, config, repositories)
 	httpServer := &http.Server{
 		Addr:    net.JoinHostPort(config.Host, config.Port),
 		Handler: srv,
@@ -105,6 +106,12 @@ func handleGracefulShutdown(log logger.Logger, httpServer *http.Server, ctx cont
 
 	log.Info("server shutdown gracefully")
 	return nil
+}
+
+func setupRepositories(databaseConnectionPool *pgxpool.Pool) *repository.Repositories {
+	return &repository.Repositories{
+		User: repository.NewUserRepository(databaseConnectionPool),
+	}
 }
 
 func run(ctx context.Context, args []string) error {
@@ -138,7 +145,10 @@ func run(ctx context.Context, args []string) error {
 	}
 	defer databaseConnectionPool.Close()
 
-	return setupServer(log, ctx)
+	// repository initialization
+	repositories := setupRepositories(databaseConnectionPool)
+
+	return setupServer(log, ctx, repositories)
 }
 
 func main() {

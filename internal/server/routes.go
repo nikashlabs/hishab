@@ -20,8 +20,9 @@ package server
 import (
 	"net/http"
 
-	"github.com/nikashlabs/hishab/internal/handlers"
+	"github.com/nikashlabs/hishab/internal/handler"
 	"github.com/nikashlabs/hishab/internal/middlewares"
+	"github.com/nikashlabs/hishab/internal/repository"
 	"github.com/nikashlabs/hishab/pkg/logger"
 )
 
@@ -29,8 +30,13 @@ func addRoutes(
 	mux *http.ServeMux,
 	logger logger.Logger,
 	config *Config,
+	repositories *repository.Repositories,
 ) {
-	mux.Handle("/", middlewares.Log(logger, handlers.HandleNotFound(logger)))
+	mux.Handle("/", middlewares.Log(logger, handler.HandleNotFound(logger)))
+
+	// sample: how to pass repository to a handler
+	mux.Handle("/user", middlewares.Log(logger, handler.HandleUser(logger, repositories.User)))
+
 	// mux.Handle("/api/v1/comments", handleComments(logger, commentStore))
 	// mux.Handle("/api/v1/another", handleAnother(logger, anotherStore))
 	// mux.HandleFunc("/healthz", handleHealthz(logger))
