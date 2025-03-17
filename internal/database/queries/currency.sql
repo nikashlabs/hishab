@@ -7,7 +7,7 @@ RETURNING *;
 SELECT * FROM currency WHERE id = $1;
 
 -- name: GetCurrencyByName :one
-SELECT * FROM currency WHERE name = $1;
+SELECT * FROM currency WHERE LOWER(name) = LOWER($1);
 
 -- name: UpdateCurrency :exec
 UPDATE currency
