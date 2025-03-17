@@ -93,8 +93,8 @@ const deleteScheduledRecordsByType = `-- name: DeleteScheduledRecordsByType :exe
 DELETE FROM scheduled_records WHERE type = $1
 `
 
-func (q *Queries) DeleteScheduledRecordsByType(ctx context.Context, type_ pgtype.Text) error {
-	_, err := q.db.Exec(ctx, deleteScheduledRecordsByType, type_)
+func (q *Queries) DeleteScheduledRecordsByType(ctx context.Context, recordType pgtype.Text) error {
+	_, err := q.db.Exec(ctx, deleteScheduledRecordsByType, recordType)
 	return err
 }
 
@@ -206,8 +206,8 @@ const listScheduledRecordsByType = `-- name: ListScheduledRecordsByType :many
 SELECT id, user_id, account_id, title, type, category_id, amount, status, date, recurring_interval, recurring FROM scheduled_records WHERE type = $1 ORDER BY date DESC
 `
 
-func (q *Queries) ListScheduledRecordsByType(ctx context.Context, type_ pgtype.Text) ([]ScheduledRecord, error) {
-	rows, err := q.db.Query(ctx, listScheduledRecordsByType, type_)
+func (q *Queries) ListScheduledRecordsByType(ctx context.Context, recordType pgtype.Text) ([]ScheduledRecord, error) {
+	rows, err := q.db.Query(ctx, listScheduledRecordsByType, recordType)
 	if err != nil {
 		return nil, err
 	}

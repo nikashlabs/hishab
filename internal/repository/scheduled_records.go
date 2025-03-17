@@ -53,8 +53,8 @@ func (r *ScheduledRecordRepository) ListScheduledRecordsByStatus(ctx context.Con
 	return r.queries.ListScheduledRecordsByStatus(ctx, status)
 }
 
-func (r *ScheduledRecordRepository) ListScheduledRecordsByType(ctx context.Context, type_ pgtype.Text) ([]sqlc.ScheduledRecord, error) {
-	return r.queries.ListScheduledRecordsByType(ctx, type_)
+func (r *ScheduledRecordRepository) ListScheduledRecordsByType(ctx context.Context, recordType pgtype.Text) ([]sqlc.ScheduledRecord, error) {
+	return r.queries.ListScheduledRecordsByType(ctx, recordType)
 }
 
 func (r *ScheduledRecordRepository) ListScheduledRecordsByUser(ctx context.Context, userID pgtype.Int4) ([]sqlc.ScheduledRecord, error) {
@@ -77,8 +77,8 @@ func (r *ScheduledRecordRepository) DeleteScheduledRecordsByStatus(ctx context.C
 	return r.queries.DeleteScheduledRecordsByStatus(ctx, status)
 }
 
-func (r *ScheduledRecordRepository) DeleteScheduledRecordsByType(ctx context.Context, type_ pgtype.Text) error {
-	return r.queries.DeleteScheduledRecordsByType(ctx, type_)
+func (r *ScheduledRecordRepository) DeleteScheduledRecordsByType(ctx context.Context, recordType pgtype.Text) error {
+	return r.queries.DeleteScheduledRecordsByType(ctx, recordType)
 }
 
 func (r *ScheduledRecordRepository) DeleteScheduledRecordsByUser(ctx context.Context, userID pgtype.Int4) error {
