@@ -114,7 +114,19 @@ func handleGracefulShutdown(log logger.Logger, httpServer *http.Server, ctx cont
 
 func setupRepositories(databaseConnectionPool *pgxpool.Pool) *repository.Repositories {
 	return &repository.Repositories{
-		User: repository.NewUserRepository(databaseConnectionPool),
+		User:            repository.NewUserRepository(databaseConnectionPool),
+		Account:         repository.NewAccountRepository(databaseConnectionPool),
+		Currency:        repository.NewCurrencyRepository(databaseConnectionPool),
+		ExpenseCategory: repository.NewExpenseCategoryRepository(databaseConnectionPool),
+		ExpenseRecord:   repository.NewExpenseRecordRepository(databaseConnectionPool),
+		IncomeCategory:  repository.NewIncomeCategoryRepository(databaseConnectionPool),
+		IncomeRecord:    repository.NewIncomeRecordRepository(databaseConnectionPool),
+		Installment:     repository.NewInstallmentRepository(databaseConnectionPool),
+		InvestmentType:  repository.NewInvestmentTypeRepository(databaseConnectionPool),
+		Investment:      repository.NewInvestmentRepository(databaseConnectionPool),
+		LoanType:        repository.NewLoanTypeRepository(databaseConnectionPool),
+		Loan:            repository.NewLoanRepository(databaseConnectionPool),
+		ScheduledRecord: repository.NewScheduledRecordRepository(databaseConnectionPool),
 	}
 }
 
