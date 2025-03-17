@@ -69,6 +69,10 @@ func loadServerConfig(log logger.Logger) (*server.Config, error) {
 }
 
 func setupServer(log logger.Logger, ctx context.Context, repositories *repository.Repositories) error {
+	if repositories == nil {
+		return fmt.Errorf("repositories cannot be nil")
+	}
+
 	// load config
 	config, err := loadServerConfig(log)
 	if err != nil {
