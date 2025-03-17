@@ -35,6 +35,8 @@ func NewInvestmentRepository(db *pgxpool.Pool) *InvestmentRepository {
 	}
 }
 
+// TODO: validate data before setting
+
 func (r *InvestmentRepository) CreateInvestment(ctx context.Context, investment sqlc.CreateInvestmentParams) (sqlc.Investment, error) {
 	return r.queries.CreateInvestment(ctx, investment)
 }

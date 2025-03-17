@@ -34,6 +34,8 @@ func NewInvestmentTypeRepository(db *pgxpool.Pool) *InvestmentTypeRepository {
 	}
 }
 
+// TODO: validate data before setting
+
 func (r *InvestmentTypeRepository) CreateInvestmentType(ctx context.Context, investmentType sqlc.CreateInvestmentTypeParams) (sqlc.InvestmentType, error) {
 	return r.queries.CreateInvestmentType(ctx, investmentType)
 }

@@ -35,6 +35,8 @@ func NewExpenseRecordRepository(db *pgxpool.Pool) *ExpenseRecordRepository {
 	}
 }
 
+// TODO: validate data before setting
+
 func (r *ExpenseRecordRepository) CreateExpenseRecord(ctx context.Context, record sqlc.CreateExpenseRecordParams) (sqlc.ExpenseRecord, error) {
 	return r.queries.CreateExpenseRecord(ctx, record)
 }

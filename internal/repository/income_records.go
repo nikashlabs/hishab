@@ -35,6 +35,8 @@ func NewIncomeRecordRepository(db *pgxpool.Pool) *IncomeRecordRepository {
 	}
 }
 
+// TODO: validate data before setting
+
 func (r *IncomeRecordRepository) CreateIncomeRecord(ctx context.Context, record sqlc.CreateIncomeRecordParams) (sqlc.IncomeRecord, error) {
 	return r.queries.CreateIncomeRecord(ctx, record)
 }

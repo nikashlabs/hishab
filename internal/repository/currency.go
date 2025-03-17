@@ -34,6 +34,8 @@ func NewCurrencyRepository(db *pgxpool.Pool) *CurrencyRepository {
 	}
 }
 
+// TODO: validate data before setting
+
 func (r *CurrencyRepository) CreateCurrency(ctx context.Context, currency sqlc.CreateCurrencyParams) (sqlc.Currency, error) {
 	return r.queries.CreateCurrency(ctx, currency)
 }

@@ -34,6 +34,8 @@ func NewLoanTypeRepository(db *pgxpool.Pool) *LoanTypeRepository {
 	}
 }
 
+// TODO: validate data before setting
+
 func (r *LoanTypeRepository) CreateLoanType(ctx context.Context, loanType sqlc.CreateLoanTypeParams) (sqlc.LoanType, error) {
 	return r.queries.CreateLoanType(ctx, loanType)
 }

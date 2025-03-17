@@ -34,6 +34,8 @@ func NewUserRepository(db *pgxpool.Pool) *UserRepository {
 	}
 }
 
+// TODO: validate data before setting
+
 func (r *UserRepository) CreateUser(ctx context.Context, user sqlc.User) (sqlc.User, error) {
 	return r.queries.CreateUser(ctx, sqlc.CreateUserParams{
 		Name:       user.Name,

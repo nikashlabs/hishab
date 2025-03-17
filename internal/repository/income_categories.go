@@ -35,6 +35,8 @@ func NewIncomeCategoryRepository(db *pgxpool.Pool) *IncomeCategoryRepository {
 	}
 }
 
+// TODO: validate data before setting
+
 func (r *IncomeCategoryRepository) CreateIncomeCategory(ctx context.Context, category sqlc.CreateIncomeCategoryParams) (sqlc.IncomeCategory, error) {
 	return r.queries.CreateIncomeCategory(ctx, category)
 }

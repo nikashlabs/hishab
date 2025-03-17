@@ -35,6 +35,8 @@ func NewInstallmentRepository(db *pgxpool.Pool) *InstallmentRepository {
 	}
 }
 
+// TODO: validate data before setting
+
 func (r *InstallmentRepository) CreateInstallment(ctx context.Context, installment sqlc.CreateInstallmentParams) (sqlc.Installment, error) {
 	return r.queries.CreateInstallment(ctx, installment)
 }

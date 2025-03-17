@@ -35,6 +35,8 @@ func NewExpenseCategoryRepository(db *pgxpool.Pool) *ExpenseCategoryRepository {
 	}
 }
 
+// TODO: validate data before setting
+
 func (r *ExpenseCategoryRepository) CreateExpenseCategory(ctx context.Context, category sqlc.CreateExpenseCategoryParams) (sqlc.ExpenseCategory, error) {
 	return r.queries.CreateExpenseCategory(ctx, category)
 }

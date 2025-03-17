@@ -35,6 +35,8 @@ func NewLoanRepository(db *pgxpool.Pool) *LoanRepository {
 	}
 }
 
+// TODO: validate data before setting
+
 func (r *LoanRepository) CreateLoan(ctx context.Context, loan sqlc.CreateLoanParams) (sqlc.Loan, error) {
 	return r.queries.CreateLoan(ctx, loan)
 }

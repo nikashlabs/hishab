@@ -35,6 +35,8 @@ func NewScheduledRecordRepository(db *pgxpool.Pool) *ScheduledRecordRepository {
 	}
 }
 
+// TODO: validate data before setting
+
 func (r *ScheduledRecordRepository) CreateScheduledRecord(ctx context.Context, record sqlc.CreateScheduledRecordParams) (sqlc.ScheduledRecord, error) {
 	return r.queries.CreateScheduledRecord(ctx, record)
 }

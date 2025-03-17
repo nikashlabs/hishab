@@ -35,6 +35,8 @@ func NewAccountRepository(db *pgxpool.Pool) *AccountRepository {
 	}
 }
 
+// TODO: validate data before setting
+
 func (r *AccountRepository) CreateAccount(ctx context.Context, account sqlc.CreateAccountParams) (sqlc.Account, error) {
 	return r.queries.CreateAccount(ctx, account)
 }
