@@ -30,7 +30,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/nikashlabs/hishab/internal/database"
-	"github.com/nikashlabs/hishab/internal/repository"
+	"github.com/nikashlabs/hishab/internal/repositories"
 	"github.com/nikashlabs/hishab/internal/server"
 	"github.com/nikashlabs/hishab/pkg/logger"
 )
@@ -68,9 +68,9 @@ func loadServerConfig(log logger.Logger) (*server.Config, error) {
 	}, nil
 }
 
-func setupServer(log logger.Logger, ctx context.Context, repositories *repository.Repositories) error {
-	if repositories == nil {
-		return fmt.Errorf("repositories cannot be nil")
+func setupServer(log logger.Logger, ctx context.Context, repos *repositories.Repositories) error {
+	if repos == nil {
+		return fmt.Errorf("repos cannot be nil")
 	}
 
 	// load config
@@ -80,7 +80,7 @@ func setupServer(log logger.Logger, ctx context.Context, repositories *repositor
 	}
 
 	// create
-	srv := server.NewServer(log, config, repositories)
+	srv := server.NewServer(log, config, repos)
 	httpServer := &http.Server{
 		Addr:    net.JoinHostPort(config.Host, config.Port),
 		Handler: srv,
@@ -112,21 +112,21 @@ func handleGracefulShutdown(log logger.Logger, httpServer *http.Server, ctx cont
 	return nil
 }
 
-func setupRepositories(databaseConnectionPool *pgxpool.Pool) *repository.Repositories {
-	return &repository.Repositories{
-		User:            repository.NewUserRepository(databaseConnectionPool),
-		Account:         repository.NewAccountRepository(databaseConnectionPool),
-		Currency:        repository.NewCurrencyRepository(databaseConnectionPool),
-		ExpenseCategory: repository.NewExpenseCategoryRepository(databaseConnectionPool),
-		ExpenseRecord:   repository.NewExpenseRecordRepository(databaseConnectionPool),
-		IncomeCategory:  repository.NewIncomeCategoryRepository(databaseConnectionPool),
-		IncomeRecord:    repository.NewIncomeRecordRepository(databaseConnectionPool),
-		Installment:     repository.NewInstallmentRepository(databaseConnectionPool),
-		InvestmentType:  repository.NewInvestmentTypeRepository(databaseConnectionPool),
-		Investment:      repository.NewInvestmentRepository(databaseConnectionPool),
-		LoanType:        repository.NewLoanTypeRepository(databaseConnectionPool),
-		Loan:            repository.NewLoanRepository(databaseConnectionPool),
-		ScheduledRecord: repository.NewScheduledRecordRepository(databaseConnectionPool),
+func setupRepositories(databaseConnectionPool *pgxpool.Pool) *repositories.Repositories {
+	return &repositories.Repositories{
+		User:            repositories.NewUserRepository(databaseConnectionPool),
+		Account:         repositories.NewAccountRepository(databaseConnectionPool),
+		Currency:        repositories.NewCurrencyRepository(databaseConnectionPool),
+		ExpenseCategory: repositories.NewExpenseCategoryRepository(databaseConnectionPool),
+		ExpenseRecord:   repositories.NewExpenseRecordRepository(databaseConnectionPool),
+		IncomeCategory:  repositories.NewIncomeCategoryRepository(databaseConnectionPool),
+		IncomeRecord:    repositories.NewIncomeRecordRepository(databaseConnectionPool),
+		Installment:     repositories.NewInstallmentRepository(databaseConnectionPool),
+		InvestmentType:  repositories.NewInvestmentTypeRepository(databaseConnectionPool),
+		Investment:      repositories.NewInvestmentRepository(databaseConnectionPool),
+		LoanType:        repositories.NewLoanTypeRepository(databaseConnectionPool),
+		Loan:            repositories.NewLoanRepository(databaseConnectionPool),
+		ScheduledRecord: repositories.NewScheduledRecordRepository(databaseConnectionPool),
 	}
 }
 
@@ -161,10 +161,10 @@ func run(ctx context.Context, args []string) error {
 	}
 	defer databaseConnectionPool.Close()
 
-	// repository initialization
-	repositories := setupRepositories(databaseConnectionPool)
+	// repositories initialization
+	repos := setupRepositories(databaseConnectionPool)
 
-	return setupServer(log, ctx, repositories)
+	return setupServer(log, ctx, repos)
 }
 
 func main() {

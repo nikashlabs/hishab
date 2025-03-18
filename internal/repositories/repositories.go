@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with hishab.  If not, see <https://www.gnu.org/licenses/>.
 
-package repository
+package repositories
 
 type Repositories struct {
 	User            *UserRepository

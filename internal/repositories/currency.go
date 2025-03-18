@@ -15,44 +15,43 @@
 // You should have received a copy of the GNU General Public License
 // along with hishab.  If not, see <https://www.gnu.org/licenses/>.
 
-package repository
+package repositories
 
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/nikashlabs/hishab/internal/database/sqlc"
 )
 
-type AccountRepository struct {
+type CurrencyRepository struct {
 	queries *sqlc.Queries
 }
 
-func NewAccountRepository(db *pgxpool.Pool) *AccountRepository {
-	return &AccountRepository{
+func NewCurrencyRepository(db *pgxpool.Pool) *CurrencyRepository {
+	return &CurrencyRepository{
 		queries: sqlc.New(db),
 	}
 }
 
 // TODO: validate data before setting
 
-func (r *AccountRepository) CreateAccount(ctx context.Context, account sqlc.CreateAccountParams) (sqlc.Account, error) {
-	return r.queries.CreateAccount(ctx, account)
+func (r *CurrencyRepository) CreateCurrency(ctx context.Context, currency sqlc.CreateCurrencyParams) (sqlc.Currency, error) {
+	return r.queries.CreateCurrency(ctx, currency)
 }
 
-func (r *AccountRepository) GetAccountByID(ctx context.Context, id int32) (sqlc.Account, error) {
-	return r.queries.GetAccountByID(ctx, id)
+func (r *CurrencyRepository) GetCurrencyByID(ctx context.Context, id int32) (sqlc.Currency, error) {
+	return r.queries.GetCurrencyByID(ctx, id)
 }
 
-func (r *AccountRepository) GetAccountsByUserID(ctx context.Context, userID pgtype.Int4) ([]sqlc.Account, error) {
-	return r.queries.GetAccountsByUserID(ctx, userID)
+func (r *CurrencyRepository) GetCurrencyByName(ctx context.Context, name string) (sqlc.Currency, error) {
+	return r.queries.GetCurrencyByName(ctx, name)
 }
 
-func (r *AccountRepository) UpdateAccount(ctx context.Context, account sqlc.UpdateAccountParams) error {
-	return r.queries.UpdateAccount(ctx, account)
+func (r *CurrencyRepository) UpdateCurrency(ctx context.Context, currency sqlc.UpdateCurrencyParams) error {
+	return r.queries.UpdateCurrency(ctx, currency)
 }
 
-func (r *AccountRepository) DeleteAccount(ctx context.Context, id int32) error {
-	return r.queries.DeleteAccount(ctx, id)
+func (r *CurrencyRepository) DeleteCurrency(ctx context.Context, id int32) error {
+	return r.queries.DeleteCurrency(ctx, id)
 }

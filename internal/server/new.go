@@ -20,14 +20,14 @@ package server
 import (
 	"net/http"
 
-	"github.com/nikashlabs/hishab/internal/repository"
+	"github.com/nikashlabs/hishab/internal/repositories"
 	"github.com/nikashlabs/hishab/pkg/logger"
 )
 
 func NewServer(
 	logger logger.Logger,
 	config *Config,
-	repositories *repository.Repositories,
+	repositories *repositories.Repositories,
 ) http.Handler {
 	mux := http.NewServeMux()
 

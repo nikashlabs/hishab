@@ -22,13 +22,13 @@ import (
 	"strconv"
 
 	"github.com/nikashlabs/hishab/internal/database/sqlc"
-	"github.com/nikashlabs/hishab/internal/repository"
+	"github.com/nikashlabs/hishab/internal/repositories"
 	"github.com/nikashlabs/hishab/pkg/logger"
 )
 
 // sample: how to use repository inside handler functions to interact with database
 
-func HandleUser(logger logger.Logger, userRepo *repository.UserRepository) http.HandlerFunc {
+func HandleUser(logger logger.Logger, userRepo *repositories.UserRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
@@ -45,7 +45,7 @@ func HandleUser(logger logger.Logger, userRepo *repository.UserRepository) http.
 	}
 }
 
-func createUser(w http.ResponseWriter, r *http.Request, logger logger.Logger, userRepo *repository.UserRepository) {
+func createUser(w http.ResponseWriter, r *http.Request, logger logger.Logger, userRepo *repositories.UserRepository) {
 	var user sqlc.User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		logger.Error("failed to decode request body", "error", err)
@@ -64,7 +64,7 @@ func createUser(w http.ResponseWriter, r *http.Request, logger logger.Logger, us
 	json.NewEncoder(w).Encode(createdUser)
 }
 
-func getUserByID(w http.ResponseWriter, r *http.Request, logger logger.Logger, userRepo *repository.UserRepository) {
+func getUserByID(w http.ResponseWriter, r *http.Request, logger logger.Logger, userRepo *repositories.UserRepository) {
 	idStr := r.URL.Query().Get("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -84,7 +84,7 @@ func getUserByID(w http.ResponseWriter, r *http.Request, logger logger.Logger, u
 	json.NewEncoder(w).Encode(user)
 }
 
-func updateUser(w http.ResponseWriter, r *http.Request, logger logger.Logger, userRepo *repository.UserRepository) {
+func updateUser(w http.ResponseWriter, r *http.Request, logger logger.Logger, userRepo *repositories.UserRepository) {
 	var user sqlc.User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		logger.Error("failed to decode request body", "error", err)
@@ -102,7 +102,7 @@ func updateUser(w http.ResponseWriter, r *http.Request, logger logger.Logger, us
 	json.NewEncoder(w).Encode(map[string]string{"message": "user updated successfully"})
 }
 
-func deleteUser(w http.ResponseWriter, r *http.Request, logger logger.Logger, userRepo *repository.UserRepository) {
+func deleteUser(w http.ResponseWriter, r *http.Request, logger logger.Logger, userRepo *repositories.UserRepository) {
 	idStr := r.URL.Query().Get("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {

@@ -22,7 +22,7 @@ import (
 
 	"github.com/nikashlabs/hishab/internal/handlers"
 	"github.com/nikashlabs/hishab/internal/middlewares"
-	"github.com/nikashlabs/hishab/internal/repository"
+	"github.com/nikashlabs/hishab/internal/repositories"
 	"github.com/nikashlabs/hishab/pkg/logger"
 )
 
@@ -30,7 +30,7 @@ func addRoutes(
 	mux *http.ServeMux,
 	logger logger.Logger,
 	config *Config,
-	repositories *repository.Repositories,
+	repositories *repositories.Repositories,
 ) {
 	mux.Handle("/", middlewares.Log(logger, handlers.HandleNotFound(logger)))
 
