@@ -15,33 +15,20 @@
 // You should have received a copy of the GNU General Public License
 // along with hishab.  If not, see <https://www.gnu.org/licenses/>.
 
-package server
+package repositories
 
-import (
-	"net/http"
-
-	"github.com/nikashlabs/hishab/internal/repositories"
-	"github.com/nikashlabs/hishab/pkg/logger"
-)
-
-func NewServer(
-	logger logger.Logger,
-	config *Config,
-	repositories *repositories.Repositories,
-) http.Handler {
-	mux := http.NewServeMux()
-
-	// Register routes
-	addRoutes(
-		mux,
-		logger,
-		config,
-		repositories,
-	)
-
-	var httpHandler http.Handler = mux
-	// httpHandler = someMiddleware(httpHandler)
-	// httpHandler = someMiddleware2(httpHandler)
-	// httpHandler = someMiddleware3(httpHandler)
-	return httpHandler
+type Repositories struct {
+	User            *UserRepository
+	Account         *AccountRepository
+	Currency        *CurrencyRepository
+	ExpenseCategory *ExpenseCategoryRepository
+	ExpenseRecord   *ExpenseRecordRepository
+	IncomeCategory  *IncomeCategoryRepository
+	IncomeRecord    *IncomeRecordRepository
+	Installment     *InstallmentRepository
+	InvestmentType  *InvestmentTypeRepository
+	Investment      *InvestmentRepository
+	LoanType        *LoanTypeRepository
+	Loan            *LoanRepository
+	ScheduledRecord *ScheduledRecordRepository
 }
