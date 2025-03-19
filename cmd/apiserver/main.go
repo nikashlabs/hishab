@@ -32,6 +32,7 @@ import (
 
 	"github.com/nikashlabs/hishab/internal/cache"
 	"github.com/nikashlabs/hishab/internal/database"
+	"github.com/nikashlabs/hishab/internal/repositories"
 	"github.com/nikashlabs/hishab/internal/server"
 	"github.com/nikashlabs/hishab/pkg/logger"
 )
@@ -69,7 +70,11 @@ func loadServerConfig(log logger.Logger) (*server.Config, error) {
 	}, nil
 }
 
-func setupServer(log logger.Logger, ctx context.Context) error {
+func setupServer(log logger.Logger, ctx context.Context, repos *repositories.Repositories) error {
+	if repos == nil {
+		return fmt.Errorf("repos cannot be nil")
+	}
+
 	// load config
 	config, err := loadServerConfig(log)
 	if err != nil {
@@ -77,7 +82,7 @@ func setupServer(log logger.Logger, ctx context.Context) error {
 	}
 
 	// create
-	srv := server.NewServer(log, config)
+	srv := server.NewServer(log, config, repos)
 	httpServer := &http.Server{
 		Addr:    net.JoinHostPort(config.Host, config.Port),
 		Handler: srv,
@@ -127,6 +132,24 @@ func testRedis(ctx context.Context, log logger.Logger, rdb *redis.Client) {
 	log.Info("Got value from cache", key, val)
 }
 
+func setupRepositories(databaseConnectionPool *pgxpool.Pool) *repositories.Repositories {
+	return &repositories.Repositories{
+		User:            repositories.NewUserRepository(databaseConnectionPool),
+		Account:         repositories.NewAccountRepository(databaseConnectionPool),
+		Currency:        repositories.NewCurrencyRepository(databaseConnectionPool),
+		ExpenseCategory: repositories.NewExpenseCategoryRepository(databaseConnectionPool),
+		ExpenseRecord:   repositories.NewExpenseRecordRepository(databaseConnectionPool),
+		IncomeCategory:  repositories.NewIncomeCategoryRepository(databaseConnectionPool),
+		IncomeRecord:    repositories.NewIncomeRecordRepository(databaseConnectionPool),
+		Installment:     repositories.NewInstallmentRepository(databaseConnectionPool),
+		InvestmentType:  repositories.NewInvestmentTypeRepository(databaseConnectionPool),
+		Investment:      repositories.NewInvestmentRepository(databaseConnectionPool),
+		LoanType:        repositories.NewLoanTypeRepository(databaseConnectionPool),
+		Loan:            repositories.NewLoanRepository(databaseConnectionPool),
+		ScheduledRecord: repositories.NewScheduledRecordRepository(databaseConnectionPool),
+	}
+}
+
 func run(ctx context.Context, args []string) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
@@ -168,7 +191,10 @@ func run(ctx context.Context, args []string) error {
 	// change here: remove it when redis implementation is done
 	testRedis(ctx, log, rdb)
 
-	return setupServer(log, ctx)
+	// repositories initialization
+	repos := setupRepositories(databaseConnectionPool)
+
+	return setupServer(log, ctx, repos)
 }
 
 func main() {
