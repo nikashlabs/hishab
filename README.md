@@ -20,15 +20,15 @@ This project is licensed under the GNU General Public License v3.0. See the [LIC
     POSTGRES_USER={your_user}   
     POSTGRES_PASSWORD={your_password}
     POSTGRES_DB={your_database}
-    POSTGRES_HOST={your_host}       # localhost
-    POSTGRES_PORT={your_port}
+    POSTGRES_HOST=postgres          # according to service name in docker-compose.yml
+    POSTGRES_PORT=5432              # inter-container communication in docker, ignores port mapping
     POSTGRES_SSLMODE={your_value}
     # Cache
-    REDIS_HOST={your_host}          # localhost
-    REDIS_PORT={your_port}
+    REDIS_HOST=redis                # according to service name in docker-compose.yml
+    REDIS_PORT=6379                 # inter-container communication in docker, ignores port mapping
     REDIS_PASSWORD={your_password}
-    REDIS_DB=0                      # Redis logical database number (typically 0-15)
-    REDIS_PROTOCOL=3                # Redis protocol version (2 or 3)
+    REDIS_DB=0                      # redis logical database number (typically 0-15)
+    REDIS_PROTOCOL=3                # redis protocol version (2 or 3)
     # Others
     PRODUCTION={true/false}
     ```
