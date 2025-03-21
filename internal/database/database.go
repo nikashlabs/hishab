@@ -36,12 +36,11 @@ func Init(log logger.Logger) (bool, *pgxpool.Pool) {
 	log.Info("database connection successful")
 
 	// Migrations
-	err = RunMigrations(connectionPool)
+	err = RunMigrations(log, connectionPool)
 	if err != nil {
 		log.Error("failed to run migrations", "reason", err)
 		return false, nil
 	}
-	log.Info("migrations ran successfully")
 	return true, connectionPool
 }
 

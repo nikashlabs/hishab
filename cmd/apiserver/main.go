@@ -27,7 +27,6 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
 
 	"github.com/nikashlabs/hishab/internal/cache"
@@ -169,10 +168,12 @@ func run(ctx context.Context, args []string) error {
 		}() // ensure flush, for flushable loggers
 	}
 
-	// load .env
-	if err := godotenv.Load(); err != nil {
-		return fmt.Errorf("failed to load .env, %w", err)
-	}
+	/*
+		// load .env (not needed, when using docker-compose)
+		if err := godotenv.Load(); err != nil {
+			return fmt.Errorf("failed to load .env, %w", err)
+		}
+	*/
 
 	// database initialization
 	databaseConnectionPool, err := setupDatabase(log)

@@ -25,9 +25,10 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
+	"github.com/nikashlabs/hishab/pkg/logger"
 )
 
-func RunMigrations(databaseConnectionPool *pgxpool.Pool) error {
+func RunMigrations(log logger.Logger, databaseConnectionPool *pgxpool.Pool) error {
 	// Convert *pgxpool.Pool to *sql.DB
 	// https://github.com/jackc/pgx/blob/master/stdlib/sql.go
 	db := stdlib.OpenDBFromPool(databaseConnectionPool)
@@ -48,11 +49,22 @@ func RunMigrations(databaseConnectionPool *pgxpool.Pool) error {
 		return fmt.Errorf("failed to create db migration instance, %w", err)
 	}
 
+	// Get current migration version
+	// version, dirty, err := migration_instance.Version()
+	// if err != nil {
+	// 	return fmt.Errorf("failed to get migration version: %w", err)
+	// }
+	// log.Info("migration version", "version", version, "dirty", dirty)
+
 	// Apply migrations
 	err = migration_instance.Up()
-	if err != nil && err != migrate.ErrNoChange {
+	switch {
+	case err == nil:
+		log.Info("migrations ran successfully")
+	case err == migrate.ErrNoChange:
+		log.Info("no migrations to run")
+	default:
 		return fmt.Errorf("failed to apply db migrations, %w", err)
 	}
-
 	return nil
 }
