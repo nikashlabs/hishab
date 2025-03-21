@@ -30,7 +30,7 @@ func Init(log logger.Logger) (bool, *pgxpool.Pool) {
 	// Connection
 	connectionPool, err := pgxpool.New(context.Background(), loadDatabaseURL(log))
 	if err != nil {
-		log.Error("database connection failed: %v\n", err)
+		log.Error("database connection failed", "reason", err)
 		return false, nil
 	}
 	log.Info("database connection successful")
@@ -38,7 +38,7 @@ func Init(log logger.Logger) (bool, *pgxpool.Pool) {
 	// Migrations
 	err = RunMigrations(connectionPool)
 	if err != nil {
-		log.Error("failed to run migrations: %v\n", err)
+		log.Error("failed to run migrations", "reason", err)
 		return false, nil
 	}
 	log.Info("migrations ran successfully")
@@ -61,7 +61,7 @@ func loadDatabaseURL(log logger.Logger) string {
 	for _, key := range requiredVariables {
 		value, exists := os.LookupEnv(key)
 		if !exists || value == "" {
-			log.Error("Missing required environment variable: %s", key)
+			log.Error("missing required environment variable", "variable", key)
 			return ""
 		}
 		variables[key] = value

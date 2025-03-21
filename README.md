@@ -13,21 +13,31 @@ This project is licensed under the GNU General Public License v3.0. See the [LIC
 1. Setup `.env` file
 
     ```shell
-    HOST={your_host}
+    # Server
+    HOST={your_host}    
     PORT={your_port}
-    POSTGRES_USER={your_user}
+    # Database
+    POSTGRES_USER={your_user}   
     POSTGRES_PASSWORD={your_password}
     POSTGRES_DB={your_database}
-    POSTGRES_HOST={your_host}
+    POSTGRES_HOST={your_host}       # localhost
     POSTGRES_PORT={your_port}
-    POSTGRES_SSLMODE=disable
+    POSTGRES_SSLMODE={your_value}
+    # Cache
+    REDIS_HOST={your_host}          # localhost
+    REDIS_PORT={your_port}
+    REDIS_PASSWORD={your_password}
+    REDIS_DB=0                      # Redis logical database number (typically 0-15)
+    REDIS_PROTOCOL=3                # Redis protocol version (2 or 3)
+    # Others
+    PRODUCTION={true/false}
     ```
 
 2. Make sure you got [docker](https://www.docker.com/) installed.
 
 3. There's a `docker-compose.yml` file in the root directory, specifying the containers configurations. 
 
-4. Running PostgreSQL Server
+4. Run the docker containers
 
     ```
     docker-compose up -d
@@ -46,7 +56,7 @@ Make sure, [Go](https://go.dev/doc/install) is already installed.
     .\bin\hishab-api.exe
     ```
 
-    To stop the server, run the following powershell command
+    To stop the server, invoke keyboard interrupt (Press `CTRL+C`) or run the following powershell command
 
     ```ps
     Get-Process hishab-api | Stop-Process -Force
@@ -61,7 +71,7 @@ Make sure, [Go](https://go.dev/doc/install) is already installed.
     ./bin/hishab-api
     ```
 
-    To stop the server, run the following shell command
+    To stop the server, invoke keyboard interrupt (Press `CTRL+C`) or run the following shell command
 
     ```shell
     pkill -f hishab-api
@@ -90,10 +100,10 @@ Make sure, [Go](https://go.dev/doc/install) is already installed.
 
 ### Powershell Commands
 
-1. Reset Database
+1. Reset Docker Containers (Database, Cache)
 
     ```ps
-    docker-compose down | docker volume rm {your_database}_postgres_data | docker-compose up -d
+    docker-compose down | docker volume rm hishab_postgres_data hishab_redis_data | docker-compose up -d
     ```
 
 2. Run Migrations

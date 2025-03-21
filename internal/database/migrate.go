@@ -36,7 +36,7 @@ func RunMigrations(databaseConnectionPool *pgxpool.Pool) error {
 	// Create migration driver
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
-		return fmt.Errorf("unable to create migration driver: %w", err)
+		return fmt.Errorf("failed to create db migration driver, %w", err)
 	}
 	defer driver.Close()
 
@@ -45,13 +45,13 @@ func RunMigrations(databaseConnectionPool *pgxpool.Pool) error {
 		"file://internal/database/migrations",
 		"postgres", driver)
 	if err != nil {
-		return fmt.Errorf("unable to create migration instance: %w", err)
+		return fmt.Errorf("failed to create db migration instance, %w", err)
 	}
 
 	// Apply migrations
 	err = migration_instance.Up()
 	if err != nil && err != migrate.ErrNoChange {
-		return fmt.Errorf("unable to apply migrations: %w", err)
+		return fmt.Errorf("failed to apply db migrations, %w", err)
 	}
 
 	return nil

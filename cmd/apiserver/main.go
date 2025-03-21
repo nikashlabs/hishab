@@ -28,7 +28,9 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 
+	"github.com/nikashlabs/hishab/internal/cache"
 	"github.com/nikashlabs/hishab/internal/database"
 	"github.com/nikashlabs/hishab/internal/repositories"
 	"github.com/nikashlabs/hishab/internal/server"
@@ -51,7 +53,7 @@ func loadServerConfig(log logger.Logger) (*server.Config, error) {
 	for _, key := range requiredVariables {
 		value, exists := os.LookupEnv(key)
 		if !exists || value == "" {
-			log.Error("missing required environment variable: %s", key)
+			log.Error("missing required environment variable", "variable", key)
 			missingRequiredVariables = append(missingRequiredVariables, key)
 		}
 		variables[key] = value
@@ -76,7 +78,7 @@ func setupServer(log logger.Logger, ctx context.Context, repos *repositories.Rep
 	// load config
 	config, err := loadServerConfig(log)
 	if err != nil {
-		return fmt.Errorf("failed to load server configuration: %w", err)
+		return fmt.Errorf("failed to load server configuration, %w", err)
 	}
 
 	// create
@@ -90,7 +92,7 @@ func setupServer(log logger.Logger, ctx context.Context, repos *repositories.Rep
 	go func() {
 		log.Info("server started", "address", httpServer.Addr)
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatal("error listening and serving: %s\n", err)
+			log.Fatal("error listening and serving", "reason", err)
 		}
 	}()
 
@@ -104,12 +106,30 @@ func handleGracefulShutdown(log logger.Logger, httpServer *http.Server, ctx cont
 	defer cancel()
 
 	if err := httpServer.Shutdown(shutdownCtx); err != nil {
-		log.Error("failed to shutdown server", "error", err)
+		log.Error("failed to shutdown server", "reason", err)
 		return err
 	}
 
 	log.Info("server shutdown gracefully")
 	return nil
+}
+
+// change here: remove it when redis implementation is done
+func testRedis(ctx context.Context, log logger.Logger, rdb *redis.Client) {
+	key := "greatness"
+	value := "nothingness"
+
+	if err := rdb.Set(ctx, key, value, 0).Err(); err != nil {
+		log.Error("failed to set key in redis", "reason", err)
+		return
+	}
+	log.Info("Set value in cache", key, value)
+
+	val, err := rdb.Get(ctx, key).Result()
+	if err != nil {
+		log.Error("failed to get key from redis", "reason", err)
+	}
+	log.Info("Got value from cache", key, val)
 }
 
 func setupRepositories(databaseConnectionPool *pgxpool.Pool) *repositories.Repositories {
@@ -138,20 +158,20 @@ func run(ctx context.Context, args []string) error {
 	// change here: if you want to use a different logger
 	log, err := logger.NewZapLogger()
 	if err != nil {
-		return fmt.Errorf("failed to initialize logger: %w", err)
+		return fmt.Errorf("failed to initialize logger, %w", err)
 	}
 
 	if flushable, ok := log.(logger.Flushable); ok {
 		defer func() {
 			if err := flushable.Sync(); err != nil {
-				fmt.Fprintf(os.Stderr, "failed to flush logs: %v\n", err)
+				fmt.Fprintf(os.Stderr, "failed to flush logs, %v\n", err)
 			}
 		}() // ensure flush, for flushable loggers
 	}
 
 	// load .env
 	if err := godotenv.Load(); err != nil {
-		return fmt.Errorf("failed to load .env: %w", err)
+		return fmt.Errorf("failed to load .env, %w", err)
 	}
 
 	// database initialization
@@ -160,6 +180,16 @@ func run(ctx context.Context, args []string) error {
 		return err
 	}
 	defer databaseConnectionPool.Close()
+
+	// redis initialization
+	success, rdb := cache.Init(log)
+	if !success {
+		log.Fatal("failed to initialize redis")
+	}
+	defer rdb.Close()
+
+	// change here: remove it when redis implementation is done
+	testRedis(ctx, log, rdb)
 
 	// repositories initialization
 	repos := setupRepositories(databaseConnectionPool)
