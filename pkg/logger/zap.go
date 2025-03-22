@@ -8,11 +8,16 @@ type Zapper struct {
 	log *zap.SugaredLogger
 }
 
-func NewZapLogger() (logger Logger, err error) {
-	z, err := zap.NewProduction()
+func NewZapLogger() (Logger, error) {
+	// Create a custom config to enable caller skipping
+	config := zap.NewProductionConfig()
+
+	// This is the key part - create the logger with CallerSkip
+	z, err := config.Build(zap.AddCallerSkip(1))
 	if err != nil {
 		return nil, err
 	}
+
 	sugar := z.Sugar()
 	return &Zapper{log: sugar}, nil
 }
