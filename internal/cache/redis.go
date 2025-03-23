@@ -28,11 +28,11 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func Init(log logger.Logger) (bool, *redis.Client) {
+func Init(log logger.Logger) (*redis.Client, error) {
 	// Load config
 	options, err := loadRedisOptions(log)
 	if err != nil {
-		return false, nil
+		return nil, err
 	}
 
 	// Create client
@@ -45,10 +45,10 @@ func Init(log logger.Logger) (bool, *redis.Client) {
 	pong, err := rdb.Ping(ctx).Result()
 	if err != nil {
 		log.Error("failed to connect to redis", "reason", err)
-		return false, nil
+		return nil, err
 	}
 	log.Info("redis connection successful", "response", pong)
-	return true, rdb
+	return rdb, nil
 }
 
 func loadRedisOptions(log logger.Logger) (*redis.Options, error) {

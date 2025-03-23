@@ -150,6 +150,8 @@ func setupRepositories(databaseConnectionPool *pgxpool.Pool) *repositories.Repos
 }
 
 func run(ctx context.Context, args []string) error {
+	start := time.Now() // Start timing
+
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
@@ -182,10 +184,11 @@ func run(ctx context.Context, args []string) error {
 	}
 	defer databaseConnectionPool.Close()
 
-	// redis initialization
-	success, rdb := cache.Init(log)
-	if !success {
+	// cache initialization
+	rdb, err := cache.Init(log)
+	if err != nil {
 		log.Fatal("failed to initialize redis")
+		return err
 	}
 	defer rdb.Close()
 
@@ -194,6 +197,10 @@ func run(ctx context.Context, args []string) error {
 
 	// repositories initialization
 	repos := setupRepositories(databaseConnectionPool)
+
+	// time taken for prerequisites (logger, db, cache) loading
+	elapsed := time.Since(start)
+	log.Info("server prerequisites (logger, db, cache) loaded successfully", "time", elapsed.String())
 
 	return setupServer(log, ctx, repos)
 }
