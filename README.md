@@ -56,7 +56,7 @@ This project is licensed under the GNU General Public License v3.0. See the [LIC
 
     To run the server in development mode with hot reloading, use this command:
     ```shell
-    docker compose -f docker-compose.yaml -f docker-compose.dev.yaml up --build
+    docker compose -f docker-compose.dev.yaml up --build
     ```
 
     You can skip the `--build` flag later
