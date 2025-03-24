@@ -27,18 +27,39 @@ help:
 	@echo "  make format              - Format Go code using gofmt"
 	@echo "  make clean               - Remove build artifacts"
 
+# Makefile Util
+
+## Detect OS
+ifeq ($(OS),Windows_NT)
+  DETECTED_OS := Windows
+else
+  DETECTED_OS := $(shell uname -s)
+endif
+
+## Usage: $(call SET_ENV,VAR_NAME,VAR_VALUE)
+define SET_ENV
+  $(if $(filter Windows,$(DETECTED_OS)), \
+    @powershell -Command "$$env:$(1)='$(2)';", \
+    @export $(1)=$(2); \
+  )
+endef
+
 # Development environment
 dev:
-	COMPOSE_BAKE=true docker compose $(DEV_COMPOSE_FILES) up
+	$(call SET_ENV,COMPOSE_BAKE,true)
+	@docker compose $(DEV_COMPOSE_FILES) up
 
 dev-build:
-	COMPOSE_BAKE=true docker compose $(DEV_COMPOSE_FILES) up --build
+	$(call SET_ENV,COMPOSE_BAKE,true)
+	@docker compose $(DEV_COMPOSE_FILES) up --build
 
 dev-detached:
-	COMPOSE_BAKE=true docker compose $(DEV_COMPOSE_FILES) up -d
+	$(call SET_ENV,COMPOSE_BAKE,true)
+	@docker compose $(DEV_COMPOSE_FILES) up -d
 
 dev-build-detached:
-	COMPOSE_BAKE=true docker compose $(DEV_COMPOSE_FILES) up  -d --build
+	$(call SET_ENV,COMPOSE_BAKE,true)
+	@docker compose $(DEV_COMPOSE_FILES) up -d --build
 
 # Production environment
 prod:
