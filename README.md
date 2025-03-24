@@ -41,38 +41,38 @@ This project is licensed under the GNU General Public License v3.0. See the [LIC
     - apiserver
 
 4. Run the docker containers
+    -   **Commmands**
+        View available commands provided by Makefile:
+        ```shell
+        make help
+        ```
+    -   **Production**
+        ```shell
+        make prod-build
+        ```
+        Which basically runs `docker compose up` with `--build` under the hood. Check [Makefile](./Makefile) for more information. For running without build run this:
+        ```shell
+        make prod
+        ```
 
-    First Time
 
-    ```shell
-    docker compose up --build
-    ```
+    -   **Development** (with hot reloading)
+        With `--build`
+        ```shell
+        make dev-build
+        ```
 
-    Later
+        After first time build you can run without `--build`
+        ```shell
+        make dev
+        ```
 
-    ```shell
-    docker compose up
-    ```
-
-    To run the server in development mode with hot reloading, use this command:
-    ```shell
-    docker compose -f docker-compose.dev.yaml up --build
-    ```
-
-    You can skip the `--build` flag later
 
 ### Reset Server
 
-Powershell Command
-
+Use this command:
 ```shell
-docker compose down -v --remove-orphans; docker compose up --build
-```
-
-Shell Command
-
-```shell
-docker compose down -v --remove-orphans && docker compose up --build
+make reset
 ```
 
 ## Development

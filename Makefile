@@ -1,4 +1,4 @@
-.PHONY: dev dev-build dev-detached dev-build-detached prod prod-build prod-detached prod-build-detached stop stop-detached lint format clean help
+.PHONY: dev dev-build dev-detached dev-build-detached prod prod-build prod-detached prod-build-detached stop stop-detached lint format clean reset reset-dev help
 
 
 DEV_COMPOSE_FILES := -f docker-compose.dev.yaml
@@ -85,6 +85,22 @@ lint:
 format:
 	@echo "Formatting Go code..."
 	gofmt -w -s .
+
+# Reset Server
+RESET_CMD := @docker compose down -v --remove-orphans && docker compose up --build
+RESET_CMD_DEV = @docker compose down -v --remove-orphans && docker compose $(DEV_COMPOSE_FILES) up --build
+ifeq ($(DETECTED_OS),Windows)
+	RESET_CMD := @docker compose down -v --remove-orphans; docker compose up --build
+	RESET_CMD_DEV = @docker compose down -v --remove-orphans; docker compose $(DEV_COMPOSE_FILES) up --build
+endif
+
+reset:
+	$(RESET_CMD)
+
+.ONESHELL:
+reset-dev:
+	$(call SET_ENV,COMPOSE_BAKE,true)
+	$(RESET_CMD_DEV)
 
 # Clean build artifacts
 clean:
