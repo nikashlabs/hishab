@@ -67,6 +67,9 @@ dev-detached:
 dev-build-detached:
 	$(call SET_ENV,COMPOSE_BAKE,true) $(CMD_SEPARATOR) docker compose $(DEV_COMPOSE_FILES) up -d --build
 
+test-compose-bake:
+	$(call SET_ENV,COMPOSE_BAKE,true) $(CMD_SEPARATOR) $(call PRINT_ENV,COMPOSE_BAKE)
+
 # Production environment
 prod:
 	docker compose up
