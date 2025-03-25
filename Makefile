@@ -42,7 +42,7 @@ endif
 define SET_ENV
   $(if $(filter Windows,$(DETECTED_OS)), \
     @powershell -Command "$$env:$(1)='$(2)';", \
-    @export $(1)=$(2); \
+    @export $(1)=$(2) \
   )
 endef
 
@@ -67,9 +67,6 @@ dev-detached:
 dev-build-detached:
 	$(call SET_ENV,COMPOSE_BAKE,true) $(CMD_SEPARATOR) docker compose $(DEV_COMPOSE_FILES) up -d --build
 
-test-compose-bake:
-	$(call SET_ENV,COMPOSE_BAKE,true) $(CMD_SEPARATOR) $(call PRINT_ENV,COMPOSE_BAKE)
-
 # Production environment
 prod:
 	docker compose up
@@ -86,6 +83,12 @@ prod-build-detached:
 stop:
 	docker compose down
 
+reset:
+	@docker compose down -v --remove-orphans $(CMD_SEPARATOR) docker compose up --build
+
+reset-dev:
+	$(call SET_ENV,COMPOSE_BAKE,true) $(CMD_SEPARATOR) docker compose down -v --remove-orphans $(CMD_SEPARATOR) docker compose $(DEV_COMPOSE_FILES) up --build
+
 # Run linters - requires golangci-lint
 lint:
 	golangci-lint run
@@ -95,23 +98,6 @@ format:
 	@echo "Formatting Go code..."
 	gofmt -w -s .
 
-# Reset Server
-RESET_CMD := @docker compose down -v --remove-orphans && docker compose up --build
-RESET_CMD_DEV = @docker compose down -v --remove-orphans && docker compose $(DEV_COMPOSE_FILES) up --build
-ifeq ($(DETECTED_OS),Windows)
-	RESET_CMD := @docker compose down -v --remove-orphans; docker compose up --build
-	RESET_CMD_DEV = @docker compose down -v --remove-orphans; docker compose $(DEV_COMPOSE_FILES) up --build
-endif
-
-reset:
-	$(RESET_CMD)
-
-.ONESHELL:
-reset-dev:
-	$(call SET_ENV,COMPOSE_BAKE,true)
-	$(RESET_CMD_DEV)
-
 # Clean build artifacts
 clean:
 	rm -rf ./tmp
-
