@@ -32,8 +32,10 @@ help:
 ## Detect OS
 ifeq ($(OS),Windows_NT)
   DETECTED_OS := Windows
+  CMD_SEPARATOR := ;
 else
   DETECTED_OS := $(shell uname -s)
+  CMD_SEPARATOR := &&
 endif
 
 ## Usage: $(call SET_ENV,VAR_NAME,VAR_VALUE)
@@ -44,22 +46,26 @@ define SET_ENV
   )
 endef
 
+## Usage: $(call PRINT_ENV,VAR_NAME)
+define PRINT_ENV
+  $(if $(filter Windows,$(DETECTED_OS)), \
+    powershell -Command "Write-Output '$(1): $$env:$(1)'", \
+    echo "$(1) is set to: $$$(1)" \
+  )
+endef
+
 # Development environment
 dev:
-	$(call SET_ENV,COMPOSE_BAKE,true)
-	@docker compose $(DEV_COMPOSE_FILES) up
+	$(call SET_ENV,COMPOSE_BAKE,true) $(CMD_SEPARATOR) docker compose $(DEV_COMPOSE_FILES) up
 
 dev-build:
-	$(call SET_ENV,COMPOSE_BAKE,true)
-	@docker compose $(DEV_COMPOSE_FILES) up --build
+	$(call SET_ENV,COMPOSE_BAKE,true) $(CMD_SEPARATOR) docker compose $(DEV_COMPOSE_FILES) up --build
 
 dev-detached:
-	$(call SET_ENV,COMPOSE_BAKE,true)
-	@docker compose $(DEV_COMPOSE_FILES) up -d
+	$(call SET_ENV,COMPOSE_BAKE,true) $(CMD_SEPARATOR) docker compose $(DEV_COMPOSE_FILES) up -d
 
 dev-build-detached:
-	$(call SET_ENV,COMPOSE_BAKE,true)
-	@docker compose $(DEV_COMPOSE_FILES) up -d --build
+	$(call SET_ENV,COMPOSE_BAKE,true) $(CMD_SEPARATOR) docker compose $(DEV_COMPOSE_FILES) up -d --build
 
 # Production environment
 prod:
