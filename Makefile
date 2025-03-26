@@ -27,45 +27,48 @@ help:
 	@echo "  make format              - Format Go code using gofmt"
 	@echo "  make clean               - Remove build artifacts"
 
-# Makefile Util
-
-## Detect OS
+# Detect OS
 ifeq ($(OS),Windows_NT)
   DETECTED_OS := Windows
-  CMD_SEPARATOR := ;
 else
   DETECTED_OS := $(shell uname -s)
-  CMD_SEPARATOR := &&
 endif
-
-## Usage: $(call SET_ENV,VAR_NAME,VAR_VALUE)
-define SET_ENV
-  $(if $(filter Windows,$(DETECTED_OS)), \
-    @powershell -Command "$$env:$(1)='$(2)';", \
-    @export $(1)=$(2) \
-  )
-endef
-
-## Usage: $(call PRINT_ENV,VAR_NAME)
-define PRINT_ENV
-  $(if $(filter Windows,$(DETECTED_OS)), \
-    powershell -Command "Write-Output '$(1): $$env:$(1)'", \
-    echo "$(1) is set to: $$$(1)" \
-  )
-endef
 
 # Development environment
 dev:
-	$(call SET_ENV,COMPOSE_BAKE,true) $(CMD_SEPARATOR) docker compose $(DEV_COMPOSE_FILES) up
+ifeq ($(DETECTED_OS),Windows)
+	docker compose $(DEV_COMPOSE_FILES) up
+else
+	COMPOSE_BAKE=true docker compose $(DEV_COMPOSE_FILES) up
+endif
 
 dev-build:
-	$(call SET_ENV,COMPOSE_BAKE,true) $(CMD_SEPARATOR) docker compose $(DEV_COMPOSE_FILES) up --build
+ifeq ($(DETECTED_OS),Windows)
+	docker compose $(DEV_COMPOSE_FILES) up --build
+else
+	COMPOSE_BAKE=true docker compose $(DEV_COMPOSE_FILES) up --build
+endif
 
 dev-detached:
-	$(call SET_ENV,COMPOSE_BAKE,true) $(CMD_SEPARATOR) docker compose $(DEV_COMPOSE_FILES) up -d
+ifeq ($(DETECTED_OS),Windows)
+	docker compose $(DEV_COMPOSE_FILES) up -d
+else
+	COMPOSE_BAKE=true docker compose $(DEV_COMPOSE_FILES) up -d
+endif
 
 dev-build-detached:
-	$(call SET_ENV,COMPOSE_BAKE,true) $(CMD_SEPARATOR) docker compose $(DEV_COMPOSE_FILES) up -d --build
+ifeq ($(DETECTED_OS),Windows)
+	docker compose $(DEV_COMPOSE_FILES) up -d --build
+else
+	COMPOSE_BAKE=true docker compose $(DEV_COMPOSE_FILES) up -d --build
+endif
+
+reset-dev:
+ifeq ($(DETECTED_OS),Windows)
+	 docker compose down -v --remove-orphans && docker compose $(DEV_COMPOSE_FILES) up --build
+else
+	COMPOSE_BAKE=true docker compose down -v --remove-orphans && docker compose $(DEV_COMPOSE_FILES) up --build
+endif
 
 # Production environment
 prod:
@@ -84,10 +87,7 @@ stop:
 	docker compose down
 
 reset:
-	@docker compose down -v --remove-orphans $(CMD_SEPARATOR) docker compose up --build
-
-reset-dev:
-	$(call SET_ENV,COMPOSE_BAKE,true) $(CMD_SEPARATOR) docker compose down -v --remove-orphans $(CMD_SEPARATOR) docker compose $(DEV_COMPOSE_FILES) up --build
+	docker compose down -v --remove-orphans && docker compose up --build
 
 # Run linters - requires golangci-lint
 lint:
