@@ -14,10 +14,10 @@ This project is licensed under the GNU General Public License v3.0. See the [LIC
 
     ```shell
     # Server
-    HOST=0.0.0.0                    # for the docker container to listen on all interfaces 
+    HOST=0.0.0.0                    # for the docker container to listen on all interfaces
     PORT={your_port}
     # Database
-    POSTGRES_USER={your_user}   
+    POSTGRES_USER={your_user}
     POSTGRES_PASSWORD={your_password}
     POSTGRES_DB={your_database}
     POSTGRES_HOST=postgres          # according to service name in docker-compose.yml
@@ -35,37 +35,44 @@ This project is licensed under the GNU General Public License v3.0. See the [LIC
 
 2. Install [docker](https://www.docker.com/) on the system
 
-3. The root directory contains `docker-compose.yml` which specifies the containers' configurations. 
+3. The root directory contains `docker-compose.yaml` which specifies the containers' configurations.
     - postgres
     - redis
     - apiserver
 
 4. Run the docker containers
+    -   **Commmands**
+        View available commands provided by Makefile:
+        ```shell
+        make help
+        ```
+    -   **Production**
+        ```shell
+        make prod-build
+        ```
+        Which basically runs `docker compose up` with `--build` under the hood. Check [Makefile](./Makefile) for more information. For running without build run this:
+        ```shell
+        make prod
+        ```
 
-    First Time
 
-    ```shell
-    docker-compose up --build
-    ```
+    -   **Development** (with hot reloading)
+        With `--build`
+        ```shell
+        make dev-build
+        ```
 
-    Later
-    
-    ```shell
-    docker-compose up
-    ```
+        After first time build you can run without `--build`
+        ```shell
+        make dev
+        ```
+
 
 ### Reset Server
 
-Powershell Command
-
+Use this command:
 ```shell
-docker-compose down -v --remove-orphans; docker-compose up --build
-```
-
-Shell Command
-
-```shell
-docker-compose down -v --remove-orphans && docker-compose up --build
+make reset
 ```
 
 ## Development
@@ -76,8 +83,8 @@ docker-compose down -v --remove-orphans && docker-compose up --build
 
 2. For Windows
     - Download the pre-built binary from the [guide](https://docs.sqlc.dev/en/latest/overview/install.html).
-    - Extract the `.zip` file (`sqlc.exe` will be inside) and put the `.exe` into a location of your choice. 
-    - Add the location to system environment variables (for ease of use). 
+    - Extract the `.zip` file (`sqlc.exe` will be inside) and put the `.exe` into a location of your choice.
+    - Add the location to system environment variables (for ease of use).
     - Then, `sqlc.exe` can be used from any location to perform necessary tasks.
 
 ### golang-migrate
